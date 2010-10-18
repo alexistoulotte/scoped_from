@@ -18,17 +18,13 @@ module ScopedFrom
       end
       
       def scoped_from(params, options = {})
-        scope = scoped
-        (params || {}).each do |name, value|
-          scope = scope.send(name, value) if scopes.key?(name.to_sym)
-        end
-        scope
+        Query.new(self, params, options).scope
       end
       
       private
       
       def scope_arities
-        read_inheritable_attribute(:scope_arities) || write_inheritable_attribute(:scope_arities, {}.with_indifferent_access)
+        read_inheritable_attribute(:scope_arities) || write_inheritable_attribute(:scope_arities, ActiveSupport::HashWithIndifferentAccess.new)
       end
 
     end
