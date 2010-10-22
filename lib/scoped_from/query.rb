@@ -4,7 +4,10 @@ module ScopedFrom
     
     attr_reader :params
     
+    # Available options are: - :only : to restrict to specified keys.
+    #                        - :except : to ignore specified keys.
     def initialize(scope, params, options = {})
+      @options = options
       self.params = params
     end
     
@@ -21,6 +24,8 @@ module ScopedFrom
         end
         @params[name] = value if value.present?
       end
+      @params.slice!(*[@options[:only]].flatten) if @options[:only].present?
+      @params.except!(*[@options[:except]].flatten) if @options[:except].present?
     end
     
   end

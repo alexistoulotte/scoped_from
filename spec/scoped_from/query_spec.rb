@@ -60,6 +60,16 @@ describe ScopedFrom::Query do
       items.should == ['bar', 'foo', nil]
     end
     
+    it 'accepts :only option' do
+      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :only => [:foo, 'bar']).params.should == { 'foo' => 'bar', 'bar' => 'baz' }
+      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :only => :foo).params.should == { 'foo' => 'bar' }
+    end
+    
+    it 'accepts :except option' do
+      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :except => [:foo, 'bar']).params.should == { 'baz' => 'toto' }
+      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :except => :foo).params.should == { 'baz' => 'toto', 'bar' => 'baz' }
+    end
+    
   end
   
 end
