@@ -8,6 +8,8 @@ module ScopedFrom
     
     # Available options are: - :only : to restrict to specified keys.
     #                        - :except : to ignore specified keys.
+    #                        - :include_blank : to include blank values
+    #                                           (default false).
     def initialize(scope, params, options = {})
       @scope = scope.scoped
       @options = options
@@ -44,10 +46,15 @@ module ScopedFrom
       params.each do |name, value|
         if value.is_a?(Array)
           value = value.flatten
-          value.delete_if(&:blank?)
-          value = value.first unless value.many?
+          value.delete_if(&:blank?) unless @options[:include_blank]
+          if value.many?
+            @params[name] = value
+          elsif value.any?
+            @params[name] = value.first
+          end
+        elsif @options[:include_blank] || value.present?
+          @params[name] = value
         end
-        @params[name] = value if value.present?
       end
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?
       @params.except!(*[@options[:except]].flatten) if @options[:except].present?

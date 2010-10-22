@@ -83,6 +83,15 @@ describe ScopedFrom::Query do
       query(User, query(User, { :foo => 'toto', 'bar' => 'baz' }, :only => :foo)).params.should == { 'foo' => 'toto' }
     end
     
+    it 'preserve blank values if :include_blank option is true' do
+      query(User, { :foo => nil, 'toto' => 'titi', 'bar' => "\n " }, :include_blank => true).params.should == { 'foo' => nil, 'toto' => 'titi', 'bar' => "\n " }
+    end
+    
+    it 'preserve blank values from array if :include_blank option is true' do
+      query(User, { :foo => nil, 'toto' => 'titi', 'bar' => ["\n ", 'toto', 'titi'] }, :include_blank => true).params.should == { 'foo' => nil, 'toto' => 'titi', 'bar' => ["\n ", 'toto', 'titi'] }
+      query(User, { 'toto' => 'titi', 'bar' => [] }, :include_blank => true).params.should == { 'toto' => 'titi' }
+    end
+    
   end
   
   describe '#scope' do
