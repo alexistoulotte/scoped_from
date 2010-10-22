@@ -22,7 +22,22 @@ describe ScopedFrom::ActiveRecord do
   
   describe '#scoped_from' do
     
-    it 'should have specs'
+    it 'just build a new query and return its scope' do
+      query = mock(:query)
+      query.should_receive(:scope).and_return(42)
+      ScopedFrom::Query.should_receive(:new).with(User, 'foo', :except => 'bam').and_return(query)
+      User.scoped_from('foo', :except => 'bam').should == 42
+    end
+    
+    it 'build scopes' do
+      User.scoped_from(:search => 'jane').should == [users(:jane)]
+      User.scoped_from(:search => 'john').should == [users(:john)]
+    end
+    
+    it 'can be chained with other scopes' do
+      User.scoped_from(:search => 'jane').should == [users(:jane)]
+      User.enabled.scoped_from(:search => 'jane').should == []
+    end
     
   end
   
