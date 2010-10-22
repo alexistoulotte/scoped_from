@@ -158,6 +158,16 @@ describe ScopedFrom::Query do
       query.send(:true?, 'ON ').should be_true
     end
     
+    it 'is true if "yes" is given' do
+      query.send(:true?, 'yes').should be_true
+      query.send(:true?, ' Yes ').should be_true
+    end
+    
+    it 'is true if "y" is given' do
+      query.send(:true?, 'y').should be_true
+      query.send(:true?, 'Y ').should be_true
+    end
+    
     it 'is false if false is given' do
       query.send(:true?, false).should be_false
     end

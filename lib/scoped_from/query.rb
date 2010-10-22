@@ -2,7 +2,7 @@ module ScopedFrom
   
   class Query
     
-    TRUE_VALUES = %w( true 1 on ).freeze
+    TRUE_VALUES = %w( true yes y on 1 ).freeze
     
     attr_reader :params
     
