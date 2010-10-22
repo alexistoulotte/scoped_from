@@ -92,6 +92,10 @@ describe ScopedFrom::Query do
       query(User, { 'toto' => 'titi', 'bar' => [] }, :include_blank => true).params.should == { 'toto' => 'titi' }
     end
     
+    it 'also preserve blank on query string if :include_blank option is true' do
+      query(User, 'toto=&titi=%20&titi=tata', :include_blank => true).params.should == { 'toto' => '', 'titi' => [' ', 'tata'] }
+    end
+    
   end
   
   describe '#scope' do
