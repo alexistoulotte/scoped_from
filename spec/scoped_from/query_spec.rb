@@ -125,6 +125,41 @@ describe ScopedFrom::Query do
       query(User, :search => ['John', 'Done']).scope.should == []
     end
     
+    it 'defines #query method on returned scoped' do
+      query(User).scope.should respond_to(:query)
+    end
+    
+    it 'does not defines #query method on scope if already defined' do
+      class User
+        def self.query
+          42
+        end
+      end
+      begin
+        User.query.should be(42)
+        query(User).scope.query.should be(42)
+      ensure
+        class User
+          class << self
+            remove_method :query
+          end
+        end
+      end
+    end
+    
+    it 'does not define #query method for future scopes' do
+      query(User).scope.query.should be_present
+      User.should_not respond_to(:query)
+      User.scoped.should_not respond_to(:query)
+      User.enabled.should_not respond_to(:query)
+    end
+    
+    it 'defined #query method returns query' do
+      q = query(User)
+      q.scope.query.should be_a(ScopedFrom::Query)
+      q.scope.query.should be(q)
+    end
+    
   end
   
   describe '#scoped' do

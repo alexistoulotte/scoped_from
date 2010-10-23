@@ -23,10 +23,19 @@ module ScopedFrom
           scope = scoped(scope, name, value)
         end
       end
-      scope
+      decorate_scope(scope)
     end
     
     protected
+    
+    def decorate_scope(scope)
+      return scope if scope.respond_to?(:query)
+      def scope.query
+        @__query
+      end
+      scope.instance_variable_set('@__query', self)
+      scope
+    end
     
     def scoped(scope, name, value)
       arity = scope.scope_arity(name)
