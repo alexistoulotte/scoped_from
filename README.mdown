@@ -1,7 +1,7 @@
 # Scoped From
 
 Provides a simple mapping between scopes and controller parameters for
-[Ruby On Rails 3.x](http://rubyonrails.org/).
+[Ruby On Rails 3](http://rubyonrails.org/).
 
 Let see a simple example:
 
