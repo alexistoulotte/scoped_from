@@ -1,3 +1,115 @@
 # Scoped From
 
-TODO
+Provides a simple mapping between scopes and controller parameters for
+[Ruby On Rails 3.x](http://rubyonrails.org/).
+
+Let see a simple example:
+
+A model with some scopes:
+
+    class Post < ActiveRecord::Base
+    
+      scope :commented, where('commments_count > 0')
+
+      scope :created_between, lambda { |after, before|
+        where('created_at >= ? AND created_at <= ?', after, before)
+      }
+      
+      scope :search, lambda { |pattern|
+        where('body LIKE', "%#{pattern}%")
+      }
+      
+      scope :with_category, lambda { |category_id|
+        where(:category_id, category_id)
+      }
+    
+    end
+    
+Then, your controller:
+    
+    class PostsController < ActionController::Base
+    
+      def index
+        @posts = Post.scoped_from(params)
+      end
+    
+    end
+    
+Then, it just filter your model from params:
+    
+    /posts?commented=1
+    /posts?search=rails
+    /posts?search=rails&commented=1&with_category=42
+
+## Accepted scopes
+
+All scopes can be mapped with `scoped_from` method **except** scopes taking a
+`lambda` (or a `Proc`) with an arity greater than 1 (for example:
+`created_between` in the above code).
+
+Scopes with no argument are invoked if parameter value is evaluated as `true`.
+It includes: `"true"`, `"yes"`, `"y"`, `"on"`, and `"1"` strings.
+
+## Scopes restriction
+
+You can restrict mapping to some scopes with `:only` option:
+
+    @posts = Post.scoped_from(params, :only => ['commented', 'search'])
+
+You can also exclude some scopes from mapping with `:except` option:
+
+    @posts = Post.scoped_from(params, :except => 'commented')
+
+## Some cool stuff
+
+If your provide an array as parameter value, scope is invoked with each item
+of the array:
+
+    @posts = Post.scoped_from(:search => ['bar', 'foo'])
+    
+    # is equivalent to
+    
+    @posts = Post.search('bar').search('foo')
+
+By default, blank parameter values are ignored, you can include them with
+`:include_blank` option:
+
+    @posts = Post.scoped_from(params, :include_blank => true)
+
+A query string can also be given to `scoped_from` method:
+
+    @posts = Post.scoped_from('with_category=24&search[]=foo&search[]=bar')
+
+Returned scope from `scoped_from` method gives access to an internal query
+object:
+
+    @posts = Post.scoped_from(params)
+    @query = @posts.query
+
+This query provides you some methods like `include?` and `params`. This object
+can also be used to save user's search into database or other storage system.
+
+But, you may also have to subclass this query class. You have to create a
+subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. This class
+has to be in load path. Here is an example:
+
+    class PostQuery < ScopedFrom::Query
+    
+      def category
+        Category.find_by_id(params[:with_category]) if include?(:with_category)
+      end
+    
+    end
+    
+Then into your view:
+
+    <% if @query.category %>
+      <p>All posts sorted by <%= h(@query.category.name) %></p>
+    <% else %>
+      <p>All posts</p>
+    <% end %>
+
+## Running test suite
+
+This project is fully tested with [Rspec 2](http://github.com/rspec/rspec).
+Just install it and run: `rake`.
