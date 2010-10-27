@@ -1,3 +1,4 @@
+require 'bundler/setup'
 require 'cgi'
 require 'active_record'
 
