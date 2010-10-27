@@ -5,7 +5,7 @@ Provides a simple mapping between scopes and controller parameters for
 
 Let see a simple example:
 
-A model with some scopes:
+First, a model with some scopes:
 
     class Post < ActiveRecord::Base
     
@@ -25,7 +25,7 @@ A model with some scopes:
     
     end
     
-Then, your controller:
+After, a controller:
     
     class PostsController < ActionController::Base
     
@@ -86,20 +86,23 @@ object:
     @posts = Post.scoped_from(params)
     @query = @posts.query
 
-This query provides you some methods like `include?` and `params`. This object
-can also be used to save user's search into database or other storage system.
+This query provides you some convenience methods like `params`. This object
+can also be used to save user's search into a database or other storage
+system.
 
 But, you may also have to subclass this query class. You have to create a
-subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. This class
-has to be in load path. Here is an example:
+subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. Here is an
+example:
 
     class PostQuery < ScopedFrom::Query
     
       def category
-        Category.find_by_id(params[:with_category]) if include?(:with_category)
+        Category.find_by_id(params[:with_category]) if params[:with_category]
       end
     
     end
+
+This class has to be in load path.
     
 Then into your view:
 
@@ -109,7 +112,7 @@ Then into your view:
       <p>All posts</p>
     <% end %>
 
-## Running test suite
+## Executing test suite
 
 This project is fully tested with [Rspec 2](http://github.com/rspec/rspec).
 Just run `rake` (after a `bundle install`).

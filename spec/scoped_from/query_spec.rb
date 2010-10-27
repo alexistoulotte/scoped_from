@@ -15,18 +15,6 @@ describe ScopedFrom::Query do
     
   end
   
-  describe '#include?' do
-    
-    it 'is true if query has specified key' do
-      query(User, 'foo' => 'bar').include?('foo').should be_true
-    end
-    
-    it 'is false otherwhise' do
-      query(User, 'bar' => 'foo').include?('foo').should be_false
-    end
-    
-  end
-  
   describe '#params=' do
     
     it 'does not fails if nil is given' do
