@@ -39,6 +39,38 @@ describe ScopedFrom::ActiveRecord do
       User.enabled.scoped_from(:search => 'jane').should == []
     end
     
+    it 'builds a ScopedFrom::Query' do
+      User.scoped_from({}).query.class.should be(ScopedFrom::Query)
+    end
+    
+    it 'builds a ScopedFrom::Query if #{Class}Query is not defined' do
+      Post.scoped_from({}).query.class.should be(ScopedFrom::Query)
+      Object.const_defined?('PostQuery').should be_false
+      expect {
+        PostQuery
+      }.to raise_error(NameError, 'uninitialized constant PostQuery')
+    end
+    
+    it 'builds a #{Class}Query if #{Class}Query is defined and is a ScopedFrom::Query' do
+      Comment.scoped_from({}).query.class.should be(CommentQuery)
+      Comment.where(:foo => 'bar').scoped_from({}).query.class.should be(CommentQuery)
+      CommentQuery.should be_a(Class)
+      CommentQuery.ancestors.should include(ScopedFrom::Query)
+    end
+    
+    it 'builds a ScopedFrom::Query if #{Class}Query is defined but not a subclass of ScopedFrom::Query' do
+      User.scoped_from({}).query.class.should be(ScopedFrom::Query)
+      Object.const_defined?('UserQuery').should be_true
+      UserQuery.should be_a(Class)
+      UserQuery.ancestors.should_not include(ScopedFrom::Query)
+    end
+    
+    it 'builds a ScopedFrom::Query if #{Class}Query is defined but is a module' do
+      Vote.scoped_from({}).query.class.should be(ScopedFrom::Query)
+      Object.const_defined?('VoteQuery').should be_true
+      VoteQuery.should be_a(Module)
+    end
+    
   end
   
 end
