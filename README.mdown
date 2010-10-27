@@ -67,7 +67,7 @@ of the array:
 
     @posts = Post.scoped_from(:search => ['bar', 'foo'])
     
-    # is equivalent to
+is equivalent to
     
     @posts = Post.search('bar').search('foo')
 
@@ -112,4 +112,4 @@ Then into your view:
 ## Running test suite
 
 This project is fully tested with [Rspec 2](http://github.com/rspec/rspec).
-Just install it and run: `rake`.
+Just run `rake` (after a `bundle install`).
