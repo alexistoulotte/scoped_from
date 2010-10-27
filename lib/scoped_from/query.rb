@@ -16,6 +16,10 @@ module ScopedFrom
       self.params = params
     end
     
+    def include?(name)
+      params.key?(name)
+    end
+    
     def scope
       scope = @scope
       params.each do |name, value|
