@@ -7,6 +7,7 @@ describe ScopedFrom::ActiveRecord do
     it 'is correct value' do
       User.scope_arity(:enabled).should be(-1)
       User.scope_arity(:search).should be(1)
+      User.scope_arity(:created_between).should be(2)
     end
     
     it 'is nil if specified name is undefined' do
