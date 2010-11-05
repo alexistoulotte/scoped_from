@@ -78,6 +78,12 @@ describe ScopedFrom::Query do
       query(User, :search => [nil, 'bar', "\n"]).params.should == { 'search' => 'bar' }
     end
     
+    it 'does not modify given hash' do
+      hash = { :search => 'foo', :enabled => '1', :bar => 'foo' }
+      query(User, hash)
+      hash.should == { :search => 'foo', :enabled => '1', :bar => 'foo' }
+    end
+    
     it 'does not modify given array' do
       items = ['bar', 'foo', nil]
       query(User, :search => items)
