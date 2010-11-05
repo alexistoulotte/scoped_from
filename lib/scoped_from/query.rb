@@ -53,6 +53,7 @@ module ScopedFrom
       params = CGI.parse(params.to_s) unless params.is_a?(Hash)
       @params = ActiveSupport::HashWithIndifferentAccess.new
       params.each do |name, value|
+        next unless @scope.scopes.key?(name.to_sym)
         if value.is_a?(Array)
           value = value.flatten
           value.delete_if(&:blank?) unless @options[:include_blank]

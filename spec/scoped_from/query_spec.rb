@@ -22,78 +22,82 @@ describe ScopedFrom::Query do
     end
     
     it 'returns correct params' do
-      query(User, :foo => 'bar', 'toto' => 42).params.should == { 'foo' => 'bar', 'toto' => 42 }
+      query(User, :search => 'foo', 'enabled' => true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
     
     it 'returns an hash with indifferent access' do
-      query(User, 'foo' => 'bar').params.should be_a(ActiveSupport::HashWithIndifferentAccess)
-      query(User, 'foo' => 'bar').params[:foo].should == 'bar'
-      query(User, :foo => 'bar').params['foo'].should == 'bar'
+      query(User, 'search' => 'bar').params.should be_a(ActiveSupport::HashWithIndifferentAccess)
+      query(User, 'search' => 'bar').params[:search].should == 'bar'
+      query(User, :search => 'bar').params['search'].should == 'bar'
+    end
+    
+    it 'removes values that are not scopes' do
+      query(User, :foo => 'bar', 'search' => 'foo', :enabled => true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
     
     it 'removes blank values' do
-      query(User, 'foo' => 'bar', 'baz' => " \n").params.should == { 'foo' => 'bar' }
+      query(User, 'enabled' => true, 'search' => " \n").params.should == { 'enabled' => true }
     end
     
     it 'parse query string' do
-      query(User, 'bar=foo%26baz&toto=titi').params.should == { 'bar' => 'foo&baz', 'toto' => 'titi' }
+      query(User, 'search=foo%26baz&latest=true').params.should == { 'search' => 'foo&baz', 'latest' => 'true' }
     end
     
     it 'removes blank values from query string' do
-      query(User, 'bar=baz&toto=&bar=%20').params.should == { 'bar' => 'baz' }
+      query(User, 'search=baz&toto=&bar=%20').params.should == { 'search' => 'baz' }
     end
     
     it 'can have multiple values (from hash)' do
-      query(User, :foo => ['bar', 'baz']).params.should == { 'foo' => ['bar', 'baz'] }
+      query(User, :search => ['bar', 'baz']).params.should == { 'search' => ['bar', 'baz'] }
     end
     
     it 'can have multiple values (from query string)' do
-      query(User, 'foo=bar&foo=baz').params.should == { 'foo' => ['bar', 'baz'] }
+      query(User, 'search=bar&search=baz').params.should == { 'search' => ['bar', 'baz'] }
     end
     
     it 'removes blank values from array' do
-      query(User, :foo => [nil, 'bar', "\n ", 'baz']).params.should == { 'foo' => ['bar', 'baz'] }
+      query(User, :search => [nil, 'bar', "\n ", 'baz']).params.should == { 'search' => ['bar', 'baz'] }
     end
     
     it 'flats array' do
-      query(User, :foo => [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'foo' => ['bar', 'foo', 'baz'] }
+      query(User, :search => [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => ['bar', 'foo', 'baz'] }
     end
     
     it 'change array with a single value in one value' do
-      query(User, :foo => [nil, 'bar', "\n"]).params.should == { 'foo' => 'bar' }
+      query(User, :search => [nil, 'bar', "\n"]).params.should == { 'search' => 'bar' }
     end
     
     it 'does not modify given array' do
       items = ['bar', 'foo', nil]
-      query(User, :baz => items)
+      query(User, :search => items)
       items.should == ['bar', 'foo', nil]
     end
     
     it 'accepts :only option' do
-      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :only => [:foo, 'bar']).params.should == { 'foo' => 'bar', 'bar' => 'baz' }
-      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :only => :foo).params.should == { 'foo' => 'bar' }
+      query(User, { :search => 'bar', :enabled => 'true' }, :only => [:search]).params.should == { 'search' => 'bar' }
+      query(User, { :search => 'bar', :enabled => 'true' }, :only => 'search').params.should == { 'search' => 'bar' }
     end
     
     it 'accepts :except option' do
-      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :except => [:foo, 'bar']).params.should == { 'baz' => 'toto' }
-      query(User, { :foo => 'bar', :baz => 'toto', :bar => 'baz' }, :except => :foo).params.should == { 'baz' => 'toto', 'bar' => 'baz' }
+      query(User, { :search => 'bar', :enabled => true }, :except => [:search]).params.should == { 'enabled' => true }
+      query(User, { :search => 'bar', :enabled => true }, :except => 'search').params.should == { 'enabled' => true }
     end
     
     it 'accepts a query instance' do
-      query(User, query(User, { :foo => 'toto', 'bar' => 'baz' }, :only => :foo)).params.should == { 'foo' => 'toto' }
+      query(User, query(User, :search => 'toto')).params.should == { 'search' => 'toto' }
     end
     
     it 'preserve blank values if :include_blank option is true' do
-      query(User, { :foo => nil, 'toto' => 'titi', 'bar' => "\n " }, :include_blank => true).params.should == { 'foo' => nil, 'toto' => 'titi', 'bar' => "\n " }
+      query(User, { :search => "\n ", 'enabled' => true }, :include_blank => true).params.should == { 'search' => "\n ", 'enabled' => true }
     end
     
     it 'preserve blank values from array if :include_blank option is true' do
-      query(User, { :foo => nil, 'toto' => 'titi', 'bar' => ["\n ", 'toto', 'titi'] }, :include_blank => true).params.should == { 'foo' => nil, 'toto' => 'titi', 'bar' => ["\n ", 'toto', 'titi'] }
-      query(User, { 'toto' => 'titi', 'bar' => [] }, :include_blank => true).params.should == { 'toto' => 'titi' }
+      query(User, { 'search' => ["\n ", 'toto', 'titi'] }, :include_blank => true).params.should == { 'search' => ["\n ", 'toto', 'titi'] }
+      query(User, { 'search' => [] }, :include_blank => true).params.should == {}
     end
     
     it 'also preserve blank on query string if :include_blank option is true' do
-      query(User, 'toto=&titi=%20&titi=tata', :include_blank => true).params.should == { 'toto' => '', 'titi' => [' ', 'tata'] }
+      query(User, 'search=%20&enabled=true&search=foo', :include_blank => true).params.should == { 'search' => [' ', 'foo'], 'enabled' => 'true' }
     end
     
   end
