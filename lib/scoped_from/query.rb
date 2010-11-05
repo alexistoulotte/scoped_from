@@ -40,7 +40,7 @@ module ScopedFrom
     def scoped(scope, name, value)
       if scope.scope_with_one_argument?(name)
         scope.send(name, value)
-      elsif scope.scope_without_argument?(name) && true?(value)
+      elsif scope.scope_without_argument?(name)
         scope.send(name)
       else
         scope
@@ -52,17 +52,17 @@ module ScopedFrom
       params = CGI.parse(params.to_s) unless params.is_a?(Hash)
       @params = ActiveSupport::HashWithIndifferentAccess.new
       params.each do |name, value|
-        next unless @scope.scopes.key?(name.to_sym)
-        if value.is_a?(Array)
-          value = value.flatten
-          value.delete_if(&:blank?) unless @options[:include_blank]
+        value = [value].flatten
+        value.delete_if(&:blank?) unless @options[:include_blank]
+        next if value.empty?
+        if @scope.scope_without_argument?(name)
+          @params[name] = true if value.any? { |v| true?(v) }
+        elsif @scope.scope_with_one_argument?(name)
           if value.many?
             @params[name] = value
           elsif value.any?
             @params[name] = value.first
           end
-        elsif @options[:include_blank] || value.present?
-          @params[name] = value
         end
       end
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?

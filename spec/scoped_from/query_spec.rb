@@ -40,7 +40,7 @@ describe ScopedFrom::Query do
     end
     
     it 'parse query string' do
-      query(User, 'search=foo%26baz&latest=true').params.should == { 'search' => 'foo&baz', 'latest' => 'true' }
+      query(User, 'search=foo%26baz&latest=true').params.should == { 'search' => 'foo&baz', 'latest' => true }
     end
     
     it 'removes blank values from query string' do
@@ -57,6 +57,17 @@ describe ScopedFrom::Query do
     
     it 'removes blank values from array' do
       query(User, :search => [nil, 'bar', "\n ", 'baz']).params.should == { 'search' => ['bar', 'baz'] }
+    end
+    
+    it 'converts value to true (or remove it) if scope takes no argument' do
+      query(User, :latest => 'y').params.should == { 'latest' => true }
+      query(User, :latest => 'no').params.should == {}
+    end
+    
+    it 'converts array value to true (or remove it) if scope takes no argument' do
+      query(User, :latest => ['no', 'yes']).params.should == { 'latest' => true }
+      query(User, :latest => ['no', nil]).params.should == {}
+      query(User, :latest => ['fo']).params.should == {}
     end
     
     it 'flats array' do
@@ -97,7 +108,7 @@ describe ScopedFrom::Query do
     end
     
     it 'also preserve blank on query string if :include_blank option is true' do
-      query(User, 'search=%20&enabled=true&search=foo', :include_blank => true).params.should == { 'search' => [' ', 'foo'], 'enabled' => 'true' }
+      query(User, 'search=%20&enabled=true&search=foo', :include_blank => true).params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
     end
     
   end
@@ -182,10 +193,10 @@ describe ScopedFrom::Query do
       query.send(:scoped, User, :created_between, true).should == User
     end
     
-    it 'invokes scope without arguments if scope takes not argument and value is true' do
+    it 'invokes scope without arguments if scope takes not argument' do
       query.send(:scoped, User.scoped, :enabled, true).should == [users(:john)]
       query.send(:scoped, User.scoped, :enabled, ' 1 ').should == [users(:john)]
-      query.send(:scoped, User.scoped, :enabled, 'off').should == [users(:john), users(:jane)]
+      query.send(:scoped, User.scoped, :enabled, 'off').should == [users(:john)]
     end
     
     it 'invokes scope with value has argument if scope takes one argument' do
