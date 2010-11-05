@@ -7,5 +7,8 @@ class User < ActiveRecord::Base
   scope :created_between, lambda { |after, before|
     where('created_at >= ? AND created_at <= ?', after, before)
   }
+  scope :latest, lambda {
+    where('created_at >= ?', 1.week.ago)
+  }
   
 end

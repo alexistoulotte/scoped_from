@@ -105,6 +105,12 @@ describe ScopedFrom::Query do
       query(User, :enabled => true).scope
     end
     
+    it 'works with scopes with a lambda without arguments' do
+      users(:jane).update_attribute(:created_at, 10.days.ago)
+      query(User, :latest => true).scope.should == [users(:john)]
+      query(User, :latest => false).scope.should == [users(:john), users(:jane)]
+    end
+    
     it 'does not modify scope specified at initialization' do
       scope = User.search('foo')
       q = query(scope, :enabled => true)

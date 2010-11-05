@@ -41,7 +41,7 @@ module ScopedFrom
       arity = scope.scope_arity(name)
       if arity == 1
         scope.send(name, value)
-      elsif arity == -1 && true?(value)
+      elsif (arity == -1 || arity == 0) && true?(value)
         scope.send(name)
       else
         scope
