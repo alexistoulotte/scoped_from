@@ -13,8 +13,12 @@ module ScopedFrom
         scope_arities[name] = scope_options.is_a?(Proc) ? scope_options.arity : -1
       end
       
-      def scope_arity(name)
-        scope_arities[name]
+      def scope_with_one_argument?(name)
+        scope_arities[name] == 1
+      end
+      
+      def scope_without_argument?(name)
+        [-1, 0].include?(scope_arities[name])
       end
       
       def scoped_from(params, options = {})

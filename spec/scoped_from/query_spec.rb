@@ -178,17 +178,17 @@ describe ScopedFrom::Query do
       query.send(:scoped, User, :foo, true).should == User
     end
     
-    it 'returns given scope if scope arity is > 1' do
+    it 'returns given scope if scope takes more than 1 argument' do
       query.send(:scoped, User, :created_between, true).should == User
     end
     
-    it 'invokes scope without arguments if scope arity is -1 and value is true' do
+    it 'invokes scope without arguments if scope takes not argument and value is true' do
       query.send(:scoped, User.scoped, :enabled, true).should == [users(:john)]
       query.send(:scoped, User.scoped, :enabled, ' 1 ').should == [users(:john)]
       query.send(:scoped, User.scoped, :enabled, 'off').should == [users(:john), users(:jane)]
     end
     
-    it 'invokes scope with value has argument if arity is 1' do
+    it 'invokes scope with value has argument if scope takes one argument' do
       query.send(:scoped, User.scoped, :search, 'doe').should == [users(:john), users(:jane)]
       query.send(:scoped, User.scoped, :search, 'john').should == [users(:john)]
       query.send(:scoped, User.scoped, :search, 'jane').should == [users(:jane)]

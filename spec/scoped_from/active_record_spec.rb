@@ -1,22 +1,61 @@
 require 'spec_helper'
 
 describe ScopedFrom::ActiveRecord do
+
+  describe '#scope_with_one_argument?' do
+
+    it 'is true if scope has one argument' do
+      User.should be_scope_with_one_argument(:search)
+      User.should be_scope_with_one_argument('search')
+    end
+    
+    it 'is false if scope has no argument' do
+      User.should_not be_scope_with_one_argument(:latest)
+      User.should_not be_scope_with_one_argument('latest')
+    end
+    
+    it 'is false if scope has more than one argument' do
+      User.should_not be_scope_with_one_argument(:created_between)
+      User.should_not be_scope_with_one_argument('created_between')
+    end
+    
+    it 'is false if scope is not a proc' do
+      User.should_not be_scope_with_one_argument(:enabled)
+      User.should_not be_scope_with_one_argument('enabled')
+    end
+    
+    it 'is false if scope does not exist' do
+      User.should_not be_scope_with_one_argument(:foo)
+      User.should_not be_scope_with_one_argument('foo')
+    end
+    
+  end
   
-  describe '#scope_arity' do
+  describe 'scope_without_argument?' do
     
-    it 'is correct value' do
-      User.scope_arity(:enabled).should be(-1)
-      User.scope_arity(:search).should be(1)
-      User.scope_arity(:created_between).should be(2)
+    it 'is true if scope has no argument' do
+      User.should be_scope_without_argument(:latest)
+      User.should be_scope_without_argument('latest')
     end
     
-    it 'is nil if specified name is undefined' do
-      User.scope_arity(:foo).should be_nil
+    it 'is true if scope is not a proc' do
+      User.should be_scope_without_argument(:enabled)
+      User.should be_scope_without_argument('enabled')
     end
     
-    it 'is with indifferent access' do
-      User.scope_arity('search').should be(1)
-      User.scope_arity(:search).should be(1)
+    it 'is false if scope has one argument' do
+      User.should_not be_scope_without_argument(:search)
+      User.should_not be_scope_without_argument('search')
+    end
+    
+    it 'is false if scope has more than one argument' do
+      User.should_not be_scope_without_argument(:created_between)
+      User.should_not be_scope_without_argument('created_between')
+    end
+    
+    it 'is false if scope does not exist' do
+      User.should_not be_scope_without_argument(:foo)
+      User.should_not be_scope_without_argument('foo')
     end
     
   end

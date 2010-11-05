@@ -38,10 +38,9 @@ module ScopedFrom
     end
     
     def scoped(scope, name, value)
-      arity = scope.scope_arity(name)
-      if arity == 1
+      if scope.scope_with_one_argument?(name)
         scope.send(name, value)
-      elsif (arity == -1 || arity == 0) && true?(value)
+      elsif scope.scope_without_argument?(name) && true?(value)
         scope.send(name)
       else
         scope
