@@ -76,6 +76,10 @@ By default, blank parameter values are ignored, you can include them with
 
     @posts = Post.scoped_from(params, :include_blank => true)
 
+You may also want to filter on columns, just specify `:include_blank` option:
+
+    @posts = Post.scoped_from(params, :include_columns => true)
+
 A query string can also be given to `scoped_from` method:
 
     @posts = Post.scoped_from('with_category=24&search[]=foo&search[]=bar')

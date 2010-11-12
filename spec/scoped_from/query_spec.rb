@@ -117,6 +117,18 @@ describe ScopedFrom::Query do
       query(User, 'search=%20&enabled=true&search=foo', :include_blank => true).params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
     end
     
+    it 'removes column values' do
+      query(User, 'firstname' => 'Jane', 'foo' => 'bar').params.should == {}
+    end
+    
+    it 'include column values if :include_columns option is specified' do
+      query(User, { 'firstname' => 'Jane', 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
+      query(User, { :firstname => 'Jane', :foo => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
+      query(User, { 'firstname' => ['Jane', 'John'], 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => ['Jane', 'John'] }
+      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true).params.should == {}
+      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true, :include_blank => true).params.should == { 'firstname' => "\n " }
+    end
+    
   end
   
   describe '#scope' do
@@ -209,6 +221,11 @@ describe ScopedFrom::Query do
       query.send(:scoped, User.scoped, :search, 'doe').should == [users(:john), users(:jane)]
       query.send(:scoped, User.scoped, :search, 'john').should == [users(:john)]
       query.send(:scoped, User.scoped, :search, 'jane').should == [users(:jane)]
+    end
+    
+    it 'scope on column conditions if :include_columns is true' do
+      query(User, {}, :include_columns => false).send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:john), users(:jane)]
+      query(User, {}, :include_columns => true).send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:jane)]
     end
     
   end

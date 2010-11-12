@@ -42,6 +42,8 @@ module ScopedFrom
         scope.send(name, value)
       elsif scope.scope_without_argument?(name)
         scope.send(name)
+      elsif @options[:include_columns].present? && scope.column_names.include?(name.to_s)
+        scope.scoped(:conditions => { name => value })
       else
         scope
       end
@@ -57,12 +59,8 @@ module ScopedFrom
         next if value.empty?
         if @scope.scope_without_argument?(name)
           @params[name] = true if value.any? { |v| true?(v) }
-        elsif @scope.scope_with_one_argument?(name)
-          if value.many?
-            @params[name] = value
-          elsif value.any?
-            @params[name] = value.first
-          end
+        elsif @scope.scope_with_one_argument?(name) || @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
+          @params[name] = value.many? ? value : value.first
         end
       end
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?
