@@ -16,7 +16,7 @@ First, a model with some scopes:
       }
       
       scope :search, lambda { |pattern|
-        where('body LIKE', "%#{pattern}%")
+        where('body LIKE ?', "%#{pattern}%")
       }
       
       scope :with_category, lambda { |category_id|
