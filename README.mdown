@@ -76,7 +76,7 @@ By default, blank parameter values are ignored, you can include them with
 
     @posts = Post.scoped_from(params, :include_blank => true)
 
-You may also want to filter on columns, just specify `:include_blank` option:
+You may also want to filter on columns, just specify `:include_columns` option:
 
     @posts = Post.scoped_from(params, :include_columns => true)
 
@@ -111,7 +111,7 @@ This class has to be in load path.
 Then into your view:
 
     <% if @query.category %>
-      <p>All posts sorted by <%= h(@query.category.name) %></p>
+      <p>All posts sorted by <%= @query.category.name %></p>
     <% else %>
       <p>All posts</p>
     <% end %>
