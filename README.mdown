@@ -9,7 +9,7 @@ First, a model with some scopes:
 
     class Post < ActiveRecord::Base
     
-      scope :commented, where('commments_count > 0')
+      scope :commented, where('comments_count > 0')
 
       scope :created_between, lambda { |after, before|
         where('created_at >= ? AND created_at <= ?', after, before)
