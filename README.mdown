@@ -48,7 +48,7 @@ All scopes can be mapped with `scoped_from` method **except** scopes taking a
 `created_between` in the above code).
 
 Scopes with no argument are invoked if parameter value is evaluated as `true`.
-It includes: `"true"`, `"yes"`, `"y"`, `"on"`, and `"1"` strings.
+It includes `"true"`, `"yes"`, `"y"`, `"on"`, and `"1"` strings.
 
 ## Scopes restriction
 
@@ -108,10 +108,10 @@ example:
 
 This class has to be in load path.
     
-Then into your view:
+Then into a view:
 
     <% if @query.category %>
-      <p>All posts sorted by <%= @query.category.name %></p>
+      <p>All posts of category <%= @query.category.name %></p>
     <% else %>
       <p>All posts</p>
     <% end %>
