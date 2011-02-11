@@ -223,9 +223,8 @@ describe ScopedFrom::Query do
       query.send(:scoped, User.scoped, :search, 'jane').should == [users(:jane)]
     end
     
-    it 'scope on column conditions if :include_columns is true' do
-      query(User, {}, :include_columns => false).send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:john), users(:jane)]
-      query(User, {}, :include_columns => true).send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:jane)]
+    it 'scope on column conditions' do
+      query.send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:jane)]
     end
     
   end

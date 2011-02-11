@@ -42,7 +42,7 @@ module ScopedFrom
         scope.send(name, value)
       elsif scope.scope_without_argument?(name)
         scope.send(name)
-      elsif @options[:include_columns].present? && scope.column_names.include?(name.to_s)
+      elsif scope.column_names.include?(name.to_s)
         scope.scoped(:conditions => { name => value })
       else
         scope
