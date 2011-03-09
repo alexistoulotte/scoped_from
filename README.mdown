@@ -103,9 +103,9 @@ object:
     @posts = Post.scoped_from(params)
     @query = @posts.query
 
-This query provides you some convenience methods like `params`. This object
-can also be used to save user's search into a database or other storage
-system.
+This query provides you some convenience methods like `params`, `order_column`
+and `order_direction`. This object can also be used to save user's search into
+a database or other storage system.
 
 But, you may also have to subclass this query class. You have to create a
 subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. Here is an

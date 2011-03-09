@@ -15,6 +15,53 @@ describe ScopedFrom::Query do
     
   end
   
+  describe '#order_column' do
+    
+    it 'is column specified into "order" parameter' do
+      query(User, :order => 'firstname').order_column.should == 'firstname'
+      query(User, :order => 'lastname.desc').order_column.should == 'lastname'
+    end
+    
+    it 'is nil if column does not exist' do
+      query(User, :order => 'foo').order_column.should be_nil
+    end
+    
+    it 'is nil if "order" param is not specified' do
+      query(User, :search => 'foo').order_column.should be_nil
+    end
+    
+  end
+  
+  describe '#order_direction' do
+    
+    it 'is direction specified into "order" parameter' do
+      query(User, :order => 'firstname.asc').order_direction.should == 'asc'
+      query(User, :order => 'firstname.desc').order_direction.should == 'desc'
+    end
+    
+    it 'is "asc" if direction is not specified' do
+      query(User, :order => 'firstname').order_direction.should == 'asc'
+    end
+    
+    it 'is "asc" if direction is invalid' do
+      query(User, :order => 'firstname.foo').order_direction.should == 'asc'
+    end
+    
+    it 'is direction even specified in another case' do
+      query(User, :order => 'firstname.ASc').order_direction.should == 'asc'
+      query(User, :order => 'firstname.DeSC').order_direction.should == 'desc'
+    end
+    
+    it 'is nil if column does not exist' do
+      query(User, :order => 'foo.desc').order_direction.should be_nil
+    end
+    
+    it 'is nil if "order" param is not specified' do
+      query(User, :search => 'foo').order_direction.should be_nil
+    end
+    
+  end
+  
   describe '#params=' do
     
     it 'does not fails if nil is given' do

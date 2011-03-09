@@ -17,6 +17,14 @@ module ScopedFrom
       self.params = params
     end
     
+    def order_column
+      parse_order(params['order'])[:column]
+    end
+    
+    def order_direction
+      parse_order(params['order'])[:direction]
+    end
+    
     def scope
       scope = @scope
       params.each do |name, value|
@@ -39,12 +47,12 @@ module ScopedFrom
     end
     
     def order_to_sql(value)
-      column_name, direction = value.to_s.split('.', 2)
-      "#{column_name} #{direction.upcase}"
+      order = parse_order(value)
+      "#{order[:column]} #{order[:direction].upcase}" if order.present?
     end
     
     def scoped(scope, name, value)
-      if 'order' == name.to_s
+      if name.to_s == 'order'
         scope.order(order_to_sql(value))
       elsif scope.scope_with_one_argument?(name)
         scope.send(name, value)
@@ -66,8 +74,8 @@ module ScopedFrom
         values.delete_if(&:blank?) unless @options[:include_blank]
         next if values.empty?
         if name.to_s == 'order'
-          order = parse_order_param(values.last)
-          @params[name] = order if order.present?
+          order = parse_order(values.last)
+          @params[name] = "#{order[:column]}.#{order[:direction]}" if order.present?
         elsif @scope.scope_without_argument?(name)
           @params[name] = true if values.any? { |value| true?(value) }
         elsif @scope.scope_with_one_argument?(name) || @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
@@ -79,11 +87,11 @@ module ScopedFrom
       @params.except!(*[@options[:except]].flatten) if @options[:except].present?
     end
     
-    def parse_order_param(value)
-      column_name, direction = value.to_s.split(/[\.:\s]+/, 2)
+    def parse_order(value)
+      column, direction = value.to_s.split(/[\.:\s]+/, 2)
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
-      @scope.column_names.include?(column_name) ? "#{column_name}.#{direction}" : nil
+      @scope.column_names.include?(column) ? { :column => column, :direction => direction } : {}
     end
     
     def true?(value)
