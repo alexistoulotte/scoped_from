@@ -79,6 +79,11 @@ describe ScopedFrom::ActiveRecord do
       User.enabled.scoped_from(:search => 'jane').should == []
     end
     
+    it 'can be used with order as parameter' do
+      User.scoped_from(:order => 'firstname').first.should == users(:jane)
+      User.scoped_from(:order => 'firstname.desc').first.should == users(:john)
+    end
+    
     it 'builds a ScopedFrom::Query' do
       User.scoped_from({}).query.class.should be(ScopedFrom::Query)
     end

@@ -1,7 +1,8 @@
 module ScopedFrom
   
   class Query
-    
+
+    ORDER_DIRECTIONS = %w( asc desc ).freeze
     TRUE_VALUES = %w( true yes y on 1 ).freeze
     
     attr_reader :params
@@ -37,8 +38,15 @@ module ScopedFrom
       scope
     end
     
+    def order_to_sql(value)
+      column_name, direction = value.to_s.split('.', 2)
+      "#{column_name} #{direction.upcase}"
+    end
+    
     def scoped(scope, name, value)
-      if scope.scope_with_one_argument?(name)
+      if 'order' == name.to_s
+        scope.order(order_to_sql(value))
+      elsif scope.scope_with_one_argument?(name)
         scope.send(name, value)
       elsif scope.scope_without_argument?(name)
         scope.send(name)
@@ -54,17 +62,28 @@ module ScopedFrom
       params = CGI.parse(params.to_s) unless params.is_a?(Hash)
       @params = ActiveSupport::HashWithIndifferentAccess.new
       params.each do |name, value|
-        value = [value].flatten
-        value.delete_if(&:blank?) unless @options[:include_blank]
-        next if value.empty?
-        if @scope.scope_without_argument?(name)
-          @params[name] = true if value.any? { |v| true?(v) }
+        values = [value].flatten
+        values.delete_if(&:blank?) unless @options[:include_blank]
+        next if values.empty?
+        if name.to_s == 'order'
+          order = parse_order_param(values.last)
+          @params[name] = order if order.present?
+        elsif @scope.scope_without_argument?(name)
+          @params[name] = true if values.any? { |value| true?(value) }
         elsif @scope.scope_with_one_argument?(name) || @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
-          @params[name] = value.many? ? value : value.first
+          value = values.many? ? values : values.first
+          @params[name] = @params[name] ? [@params[name], value].flatten : value
         end
       end
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?
       @params.except!(*[@options[:except]].flatten) if @options[:except].present?
+    end
+    
+    def parse_order_param(value)
+      column_name, direction = value.to_s.split(/[\.:\s]+/, 2)
+      direction = direction.to_s.downcase
+      direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
+      @scope.column_names.include?(column_name) ? "#{column_name}.#{direction}" : nil
     end
     
     def true?(value)

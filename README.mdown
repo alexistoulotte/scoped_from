@@ -60,6 +60,19 @@ You can also exclude some scopes from mapping with `:except` option:
 
     @posts = Post.scoped_from(params, :except => 'commented')
 
+## Mapping order
+
+If you need to map an SQL order, just pass `order` parameter:
+
+    @posts = Post.scoped_from(:order => 'created_at')
+
+Order direction can be specified using a dot, space or `:` as delimiter:
+    
+    @posts = Post.scoped_from(:order => 'created_at.desc')
+
+Note that order is SQL safe with `scoped_from` method (columns names are
+checked).
+
 ## Some cool stuff
 
 If your provide an array as parameter value, scope is invoked with each item

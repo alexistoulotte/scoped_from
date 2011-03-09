@@ -39,6 +39,10 @@ describe ScopedFrom::Query do
       query(User, 'enabled' => true, 'search' => " \n").params.should == { 'enabled' => true }
     end
     
+    it 'is case sensitive' do
+      query(User, 'Enabled' => true, "SEARCH" => 'bar').params.should be_empty
+    end
+    
     it 'parse query string' do
       query(User, 'search=foo%26baz&latest=true').params.should == { 'search' => 'foo&baz', 'latest' => true }
     end
@@ -129,6 +133,61 @@ describe ScopedFrom::Query do
       query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true, :include_blank => true).params.should == { 'firstname' => "\n " }
     end
     
+    it 'maps an "order"' do
+      query(User, { 'order' => 'firstname.asc' }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'does not map "order" if column is invalid' do
+      query(User, { 'order' => 'foo.asc' }).params.should == {}
+    end
+    
+    it 'use "asc" order direction by default' do
+      query(User, { 'order' => 'firstname' }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'use "asc" order direction if invalid' do
+      query(User, { 'order' => 'firstname.bar' }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'use "desc" order direction if specified' do
+      query(User, { 'order' => 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
+    end
+    
+    it 'order direction is case insensitive' do
+      query(User, { 'order' => 'firstname.Asc' }).params.should == { 'order' => 'firstname.asc' }
+      query(User, { 'order' => 'firstname.DESC' }).params.should == { 'order' => 'firstname.desc' }
+    end
+    
+    it 'order can be specified as symbol' do
+      query(User, { :order => 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
+    end
+    
+    it "order is case sensitive" do
+      query(User, { 'Order' => 'firstname.desc' }).params.should == {}
+    end
+    
+    it 'use last "order" if many are specified' do
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => 'lastname.desc' }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => 'firstname.desc' }
+    end
+    
+    it 'order can be delimited by a space' do
+      query(User, { 'order' => 'firstname ASC' }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'order can be delimited by any white space' do
+      query(User, { 'order' => "firstname\nASC" }).params.should == { 'order' => 'firstname.asc' }
+      query(User, { 'order' => "firstname\t   ASC" }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'order can be delimited by a ":"' do
+      query(User, { 'order' => "firstname:ASC" }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
+    it 'order can be delimited by more than one delimiter' do
+      query(User, { 'order' => "firstname :.  ASC" }).params.should == { 'order' => 'firstname.asc' }
+    end
+    
   end
   
   describe '#scope' do
@@ -162,6 +221,22 @@ describe ScopedFrom::Query do
     it 'invokes many times scope if an array is given' do
       query(User, :search => ['John', 'Doe']).scope.should == [users(:john)]
       query(User, :search => ['John', 'Done']).scope.should == []
+      query(User, :search => ['John', 'Doe']).params.should == { 'search' => ['John', 'Doe'] }
+    end
+    
+    it 'invokes many times scope if given twice (as string & symbol)' do
+      query(User, :search => 'John', 'search' => 'Done').params['search'].size.should be(2)
+      query(User, :search => 'John', 'search' => 'Done').params['search'].should include('John', 'Done')
+      
+      
+      query(User, :search => 'John', 'search' => ['Did', 'Done']).params['search'].size.should be(3)
+      query(User, :search => 'John', 'search' => ['Did', 'Done']).params['search'].should include('John', 'Did', 'Done')
+    end
+    
+    it 'invokes last order if an array is given' do
+      query(User, :order => ['lastname', 'firstname']).scope.should == [users(:jane), users(:john)]
+      query(User, :order => ['lastname', 'firstname.desc']).scope.should == [users(:john), users(:jane)]
+      query(User, :order => ['firstname.desc', 'lastname']).scope.order_values.should == ['lastname ASC']
     end
     
     it 'defines #query method on returned scoped' do
@@ -225,6 +300,11 @@ describe ScopedFrom::Query do
     
     it 'scope on column conditions' do
       query.send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:jane)]
+    end
+    
+    it 'invokes "order"' do
+      query.send(:scoped, User.scoped, :order, 'firstname.asc').should == [users(:jane), users(:john)]
+      query.send(:scoped, User.scoped, :order, 'firstname.desc').should == [users(:john), users(:jane)]
     end
     
   end
