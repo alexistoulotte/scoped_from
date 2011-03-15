@@ -62,13 +62,9 @@ describe ScopedFrom::Query do
     
   end
   
-  describe '#params=' do
+  describe '#params' do
     
-    it 'does not fails if nil is given' do
-      query(User, nil).params.should == {}
-    end
-    
-    it 'returns correct params' do
+    it 'returns params specified at initialization' do
       query(User, :search => 'foo', 'enabled' => true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
     
@@ -76,6 +72,18 @@ describe ScopedFrom::Query do
       query(User, 'search' => 'bar').params.should be_a(ActiveSupport::HashWithIndifferentAccess)
       query(User, 'search' => 'bar').params[:search].should == 'bar'
       query(User, :search => 'bar').params['search'].should == 'bar'
+    end
+    
+    it 'can be converted to query string' do
+      query(User, :search => ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search[]=foo&search[]=bar'
+    end
+    
+  end
+  
+  describe '#params=' do
+    
+    it 'does not fails if nil is given' do
+      query(User, nil).params.should == {}
     end
     
     it 'removes values that are not scopes' do
@@ -96,6 +104,10 @@ describe ScopedFrom::Query do
     
     it 'removes blank values from query string' do
       query(User, 'search=baz&toto=&bar=%20').params.should == { 'search' => 'baz' }
+    end
+    
+    it 'unescapes UTF-8 chars' do
+      query(User, 'search=%C3%A9').params.should == { 'search' => 'é' }
     end
     
     it 'can have multiple values (from hash)' do

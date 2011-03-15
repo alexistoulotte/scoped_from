@@ -1,6 +1,5 @@
 ENV["RAILS_ENV"] ||= 'test'
 
-require 'active_support/dependencies'
 require File.dirname(__FILE__) + '/../lib/scoped_from'
 
 # Support 
