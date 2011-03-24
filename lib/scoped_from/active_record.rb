@@ -1,11 +1,9 @@
 module ScopedFrom
 
   module ActiveRecord
-
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
-
+    
+    extend ActiveSupport::Concern
+    
     module ClassMethods
       
       def scope(name, scope_options, &block)
