@@ -4,6 +4,11 @@ module ScopedFrom
     
     extend ActiveSupport::Concern
     
+    included do |base|
+      base.class_attribute(:scope_arities)
+      base.scope_arities = ActiveSupport::HashWithIndifferentAccess.new
+    end
+    
     module ClassMethods
       
       def scope(name, scope_options, &block)
@@ -25,12 +30,6 @@ module ScopedFrom
         query_class.new(self, params, options).scope
       end
       
-      private
-      
-      def scope_arities
-        read_inheritable_attribute(:scope_arities) || write_inheritable_attribute(:scope_arities, ActiveSupport::HashWithIndifferentAccess.new)
-      end
-
     end
     
   end

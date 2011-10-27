@@ -75,7 +75,7 @@ describe ScopedFrom::Query do
     end
     
     it 'can be converted to query string' do
-      query(User, :search => ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search[]=foo&search[]=bar'
+      query(User, :search => ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search%5B%5D=foo&search%5B%5D=bar'
     end
     
   end

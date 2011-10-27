@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
   
-  scope :enabled, :conditions => { :enabled => true }
+  scope :enabled, where(:enabled => true)
   scope :search, lambda { |pattern|
     where('firstname LIKE ? OR lastname LIKE ?', "%#{pattern}%", "%#{pattern}%")
   }
