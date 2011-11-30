@@ -66,6 +66,8 @@ All scopes can be mapped with `scoped_from` method **except** scopes taking a
 Scopes with no argument are invoked if parameter value is evaluated as `true`.
 It includes `"true"`, `"yes"`, `"y"`, `"on"`, and `"1"` strings.
 
+Columns are also automatically scoped.
+
 ## Scopes restriction
 
 You can restrict mapping to some scopes with `:only` option:
@@ -100,9 +102,10 @@ is equivalent to
     
     @posts = Post.search('bar').search('foo')
 
-You may also want to filter on columns, just specify `:include_columns` option:
+You may also not want to filter on columns, just specify `:exclude_columns`
+option:
 
-    @posts = Post.scoped_from(params, :include_columns => true)
+    @posts = Post.scoped_from(params, :exclude_columns => true)
 
 A query string can also be given to `scoped_from` method:
 

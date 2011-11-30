@@ -83,7 +83,7 @@ module ScopedFrom
         elsif @scope.scope_with_one_argument?(name)
           value = values.many? ? values : values.first
           @params[name] = @params[name] ? [@params[name], value].flatten : value
-        elsif @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
+        elsif @options[:exclude_columns].blank? && @scope.column_names.include?(name.to_s)
           if @scope.columns_hash[name.to_s].type == :boolean
             @params[name] = true if values.all? { |value| true?(value) }
             @params[name] = false if values.all? { |value| false?(value) }

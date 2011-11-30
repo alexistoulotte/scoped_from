@@ -175,10 +175,10 @@ describe ScopedFrom::Query do
     end
     
     it 'converts value to true (or false) if column is a boolean one' do
-      query(User, { :admin => 'y' }, :include_columns => true).params.should == { 'admin' => true }
-      query(User, { :admin => 'False' }, :include_columns => true).params.should == { 'admin' => false }
-      query(User, { :admin => 'bar' }, :include_columns => true).params.should == {}
-      query(User, { :admin => ['y', false] }, :include_columns => true).params.should == {}
+      query(User, :admin => 'y').params.should == { 'admin' => true }
+      query(User, :admin => 'False').params.should == { 'admin' => false }
+      query(User, :admin => 'bar').params.should == {}
+      query(User, :admin => ['y', false]).params.should == {}
     end
     
     it 'converts array value to true (or remove it) if scope takes no argument' do
@@ -212,11 +212,15 @@ describe ScopedFrom::Query do
     it 'accepts :only option' do
       query(User, { :search => 'bar', :enabled => 'true' }, :only => [:search]).params.should == { 'search' => 'bar' }
       query(User, { :search => 'bar', :enabled => 'true' }, :only => 'search').params.should == { 'search' => 'bar' }
+      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => 'true' }, :only => 'search').params.should == { 'search' => 'bar' }
+      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => 'true' }, :only => ['search', :firstname]).params.should == { 'search' => 'bar', 'firstname' => 'Jane' }
     end
     
     it 'accepts :except option' do
       query(User, { :search => 'bar', :enabled => true }, :except => [:search]).params.should == { 'enabled' => true }
       query(User, { :search => 'bar', :enabled => true }, :except => 'search').params.should == { 'enabled' => true }
+      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => true }, :except => 'search').params.should == { 'enabled' => true, 'firstname' => 'Jane' }
+      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => true }, :except => ['search', :firstname]).params.should == { 'enabled' => true }
     end
     
     it 'accepts a query instance' do
@@ -236,15 +240,18 @@ describe ScopedFrom::Query do
       query(User, 'search=%20&enabled=true&search=foo').params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
     end
     
-    it 'removes column values' do
-      query(User, 'firstname' => 'Jane', 'foo' => 'bar').params.should == {}
+    it 'includes column values' do
+      query(User, 'firstname' => 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
+      query(User, :firstname => 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
     end
     
-    it 'include column values if :include_columns option is specified' do
-      query(User, { 'firstname' => 'Jane', 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
-      query(User, { :firstname => 'Jane', :foo => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
-      query(User, { 'firstname' => ['Jane', 'John'], 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => ['Jane', 'John'] }
-      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => "\n " }
+    it 'exclude column values if :exclude_columns option is specified' do
+      query(User, { :enabled => true, 'firstname' => 'Jane', 'foo' => 'bar' }, :exclude_columns => true).params.should == { 'enabled' => true }
+      query(User, { :enabled => true, :firstname => 'Jane', :foo => 'bar' }, :exclude_columns => true).params.should == { 'enabled' => true }
+    end
+    
+    it 'scopes have priority on columns' do
+      query(User, :enabled => false).params.should == {}
     end
     
     it 'maps an "order"' do
