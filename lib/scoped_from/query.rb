@@ -2,6 +2,7 @@ module ScopedFrom
   
   class Query
 
+    FALSE_VALUES = %w( false no n off 0 ).freeze
     ORDER_DIRECTIONS = %w( asc desc ).freeze
     TRUE_VALUES = %w( true yes y on 1 ).freeze
     
@@ -44,6 +45,10 @@ module ScopedFrom
       scope
     end
     
+    def false?(value)
+      FALSE_VALUES.include?(value.to_s.strip.downcase)
+    end
+    
     def order_to_sql(value)
       order = parse_order(value)
       "#{order[:column]} #{order[:direction].upcase}" if order.present?
@@ -74,10 +79,18 @@ module ScopedFrom
           order = parse_order(values.last)
           @params[name] = "#{order[:column]}.#{order[:direction]}" if order.present?
         elsif @scope.scope_without_argument?(name)
-          @params[name] = true if values.any? { |value| true?(value) }
-        elsif @scope.scope_with_one_argument?(name) || @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
+          @params[name] = true if values.all? { |value| true?(value) }
+        elsif @scope.scope_with_one_argument?(name)
           value = values.many? ? values : values.first
           @params[name] = @params[name] ? [@params[name], value].flatten : value
+        elsif @options[:include_columns].present? && @scope.column_names.include?(name.to_s)
+          if @scope.columns_hash[name.to_s].type == :boolean
+            @params[name] = true if values.all? { |value| true?(value) }
+            @params[name] = false if values.all? { |value| false?(value) }
+          else
+            value = values.many? ? values : values.first
+            @params[name] = @params[name] ? [@params[name], value].flatten : value
+          end
         end
       end
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?

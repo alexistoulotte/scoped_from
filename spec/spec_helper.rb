@@ -19,7 +19,7 @@ RSpec.configure do |config|
     User.delete_all
     Vote.delete_all
     
-    create_user(:john, :firstname => 'John', :lastname => 'Doe', :enabled => true)
-    create_user(:jane, :firstname => 'Jane', :lastname => 'Doe', :enabled => false)
+    create_user(:john, :firstname => 'John', :lastname => 'Doe', :enabled => true, :admin => true)
+    create_user(:jane, :firstname => 'Jane', :lastname => 'Doe', :enabled => false, :admin => false)
   end
 end

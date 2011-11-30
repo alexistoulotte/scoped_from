@@ -6,6 +6,61 @@ describe ScopedFrom::Query do
     ScopedFrom::Query.new(scope, params, options)
   end
   
+  describe '#false?' do
+    
+    it 'is true if false is given' do
+      query.send(:false?, false).should be_true
+    end
+    
+    it 'is true if "false" is given' do
+      query.send(:false?, 'false').should be_true
+      query.send(:false?, 'False').should be_true
+    end
+    
+    it 'is true if "0" is given' do
+      query.send(:false?, '0').should be_true
+    end
+    
+    it 'is true if "off" is given' do
+      query.send(:false?, 'off').should be_true
+      query.send(:false?, 'OFF ').should be_true
+    end
+    
+    it 'is true if "no" is given' do
+      query.send(:false?, 'no').should be_true
+      query.send(:false?, ' No ').should be_true
+    end
+    
+    it 'is true if "n" is given' do
+      query.send(:false?, 'n').should be_true
+      query.send(:false?, 'N ').should be_true
+    end
+    
+    it 'is false if true is given' do
+      query.send(:false?, true).should be_false
+    end
+    
+    it 'is false if "true" is given' do
+      query.send(:false?, 'true').should be_false
+      query.send(:false?, 'TrUe').should be_false
+    end
+    
+    it 'is false if "1" is given' do
+      query.send(:false?, '1').should be_false
+    end
+    
+    it 'is false if "on" is given' do
+      query.send(:false?, "on").should be_false
+      query.send(:false?, "On").should be_false
+    end
+    
+    it 'is false otherwise' do
+      query.send(:false?, 42).should be_false
+      query.send(:false?, 'bam').should be_false
+    end
+    
+  end
+  
   describe '#initialize' do
     
     it 'invokes #scoped method on specified scope' do
@@ -119,8 +174,17 @@ describe ScopedFrom::Query do
       query(User, :latest => 'no').params.should == {}
     end
     
+    it 'converts value to true (or false) if column is a boolean one' do
+      query(User, { :admin => 'y' }, :include_columns => true).params.should == { 'admin' => true }
+      query(User, { :admin => 'False' }, :include_columns => true).params.should == { 'admin' => false }
+      query(User, { :admin => 'bar' }, :include_columns => true).params.should == {}
+      query(User, { :admin => ['y', false] }, :include_columns => true).params.should == {}
+    end
+    
     it 'converts array value to true (or remove it) if scope takes no argument' do
-      query(User, :latest => ['no', 'yes']).params.should == { 'latest' => true }
+      query(User, :latest => true).params.should == { 'latest' => true }
+      query(User, :latest => ['Yes']).params.should == { 'latest' => true }
+      query(User, :latest => ['no', 'yes']).params.should == {}
       query(User, :latest => ['no', nil]).params.should == {}
       query(User, :latest => ['fo']).params.should == {}
     end
@@ -336,7 +400,7 @@ describe ScopedFrom::Query do
       query.send(:scoped, User, :created_between, true).should == User
     end
     
-    it 'invokes scope without arguments if scope takes not argument' do
+    it 'invokes scope without arguments if scope takes no arguments' do
       query.send(:scoped, User.scoped, :enabled, true).should == [users(:john)]
       query.send(:scoped, User.scoped, :enabled, ' 1 ').should == [users(:john)]
       query.send(:scoped, User.scoped, :enabled, 'off').should == [users(:john)]

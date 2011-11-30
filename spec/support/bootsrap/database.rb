@@ -5,7 +5,8 @@ ActiveRecord::Base.connection.create_table(:posts, :force => true)
 ActiveRecord::Base.connection.create_table(:users, :force => true) do |t|
   t.string :firstname, :null => false
   t.string :lastname, :null => false
-  t.boolean :enabled, :null => false
+  t.boolean :enabled, :null => false, :default => false
+  t.boolean :admin, :null => false, :default => false
   t.timestamps
 end
 ActiveRecord::Base.connection.create_table(:votes, :force => true)
