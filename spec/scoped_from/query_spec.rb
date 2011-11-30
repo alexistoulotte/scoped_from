@@ -90,10 +90,6 @@ describe ScopedFrom::Query do
       query(User, :foo => 'bar', 'search' => 'foo', :enabled => true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
     
-    it 'removes blank values' do
-      query(User, 'enabled' => true, 'search' => " \n").params.should == { 'enabled' => true }
-    end
-    
     it 'is case sensitive' do
       query(User, 'Enabled' => true, "SEARCH" => 'bar').params.should be_empty
     end
@@ -118,10 +114,6 @@ describe ScopedFrom::Query do
       query(User, 'search=bar&search=baz').params.should == { 'search' => ['bar', 'baz'] }
     end
     
-    it 'removes blank values from array' do
-      query(User, :search => [nil, 'bar', "\n ", 'baz']).params.should == { 'search' => ['bar', 'baz'] }
-    end
-    
     it 'converts value to true (or remove it) if scope takes no argument' do
       query(User, :latest => 'y').params.should == { 'latest' => true }
       query(User, :latest => 'no').params.should == {}
@@ -134,11 +126,11 @@ describe ScopedFrom::Query do
     end
     
     it 'flats array' do
-      query(User, :search => [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => ['bar', 'foo', 'baz'] }
+      query(User, :search => [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => [nil, 'bar', '', 'foo', "\n ", 'baz'] }
     end
     
     it 'change array with a single value in one value' do
-      query(User, :search => [nil, 'bar', "\n"]).params.should == { 'search' => 'bar' }
+      query(User, :search => ['bar']).params.should == { 'search' => 'bar' }
     end
     
     it 'does not modify given hash' do
@@ -167,17 +159,17 @@ describe ScopedFrom::Query do
       query(User, query(User, :search => 'toto')).params.should == { 'search' => 'toto' }
     end
     
-    it 'preserve blank values if :include_blank option is true' do
-      query(User, { :search => "\n ", 'enabled' => true }, :include_blank => true).params.should == { 'search' => "\n ", 'enabled' => true }
+    it 'preserve blank values' do
+      query(User, { :search => "\n ", 'enabled' => true }).params.should == { 'search' => "\n ", 'enabled' => true }
     end
     
-    it 'preserve blank values from array if :include_blank option is true' do
-      query(User, { 'search' => ["\n ", 'toto', 'titi'] }, :include_blank => true).params.should == { 'search' => ["\n ", 'toto', 'titi'] }
-      query(User, { 'search' => [] }, :include_blank => true).params.should == {}
+    it 'preserve blank values from array' do
+      query(User, { 'search' => ["\n ", 'toto', 'titi'] }).params.should == { 'search' => ["\n ", 'toto', 'titi'] }
+      query(User, { 'search' => [] }).params.should == {}
     end
     
-    it 'also preserve blank on query string if :include_blank option is true' do
-      query(User, 'search=%20&enabled=true&search=foo', :include_blank => true).params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
+    it 'also preserve blank on query string' do
+      query(User, 'search=%20&enabled=true&search=foo').params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
     end
     
     it 'removes column values' do
@@ -188,8 +180,7 @@ describe ScopedFrom::Query do
       query(User, { 'firstname' => 'Jane', 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
       query(User, { :firstname => 'Jane', :foo => 'bar' }, :include_columns => true).params.should == { 'firstname' => 'Jane' }
       query(User, { 'firstname' => ['Jane', 'John'], 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => ['Jane', 'John'] }
-      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true).params.should == {}
-      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true, :include_blank => true).params.should == { 'firstname' => "\n " }
+      query(User, { 'firstname' => "\n ", 'foo' => 'bar' }, :include_columns => true).params.should == { 'firstname' => "\n " }
     end
     
     it 'maps an "order"' do

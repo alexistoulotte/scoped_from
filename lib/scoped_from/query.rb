@@ -9,8 +9,6 @@ module ScopedFrom
     
     # Available options are: - :only : to restrict to specified keys.
     #                        - :except : to ignore specified keys.
-    #                        - :include_blank : to include blank values
-    #                                           (default false).
     def initialize(scope, params, options = {})
       @scope = scope.scoped
       @options = options
@@ -71,7 +69,6 @@ module ScopedFrom
       @params = ActiveSupport::HashWithIndifferentAccess.new
       params.each do |name, value|
         values = [value].flatten
-        values.delete_if(&:blank?) unless @options[:include_blank]
         next if values.empty?
         if name.to_s == 'order'
           order = parse_order(values.last)
