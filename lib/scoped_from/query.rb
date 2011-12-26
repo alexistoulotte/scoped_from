@@ -54,20 +54,6 @@ module ScopedFrom
       "#{order[:column]} #{order[:direction].upcase}" if order.present?
     end
     
-    def scoped(scope, name, value)
-      if name.to_s == 'order'
-        scope.order(order_to_sql(value))
-      elsif scope.scope_with_one_argument?(name)
-        scope.send(name, value)
-      elsif scope.scope_without_argument?(name)
-        scope.send(name)
-      elsif scope.column_names.include?(name.to_s)
-        scope.scoped(:conditions => { name => value })
-      else
-        scope
-      end
-    end
-    
     def params=(params)
       params = params.params if params.is_a?(self.class)
       params = CGI.parse(params.to_s) unless params.is_a?(Hash)
@@ -76,8 +62,8 @@ module ScopedFrom
         values = [value].flatten
         next if values.empty?
         if name.to_s == 'order'
-          order = parse_order(values.last)
-          @params[name] = "#{order[:column]}.#{order[:direction]}" if order.present?
+          orders = parse_orders(values).map { |order| "#{order[:column]}.#{order[:direction]}" }
+          @params[name] = (orders.many? ? orders : orders.first) if orders.any?
         elsif @scope.scope_without_argument?(name)
           @params[name] = true if values.all? { |value| true?(value) }
         elsif @scope.scope_with_one_argument?(name)
@@ -102,6 +88,29 @@ module ScopedFrom
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
       @scope.column_names.include?(column) ? { :column => column, :direction => direction } : {}
+    end
+    
+    def parse_orders(values)
+      [].tap do |orders|
+        values.each do |value|
+          order = parse_order(value)
+          orders << order if order.present? && !orders.any? { |o| o[:column] == order[:column] }
+        end
+      end
+    end
+    
+    def scoped(scope, name, value)
+      if name.to_s == 'order'
+        scope.order(order_to_sql(value))
+      elsif scope.scope_with_one_argument?(name)
+        scope.send(name, value)
+      elsif scope.scope_without_argument?(name)
+        scope.send(name)
+      elsif scope.column_names.include?(name.to_s)
+        scope.scoped(:conditions => { name => value })
+      else
+        scope
+      end
     end
     
     def true?(value)

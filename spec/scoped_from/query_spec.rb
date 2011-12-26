@@ -287,9 +287,11 @@ describe ScopedFrom::Query do
       query(User, { 'Order' => 'firstname.desc' }).params.should == {}
     end
     
-    it 'use last "order" if many are specified' do
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => 'lastname.desc' }
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => 'firstname.desc' }
+    it 'many order can be specified' do
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.asc' }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
     end
     
     it 'order can be delimited by a space' do
@@ -357,7 +359,7 @@ describe ScopedFrom::Query do
     it 'invokes last order if an array is given' do
       query(User, :order => ['lastname', 'firstname']).scope.should == [users(:jane), users(:john)]
       query(User, :order => ['lastname', 'firstname.desc']).scope.should == [users(:john), users(:jane)]
-      query(User, :order => ['firstname.desc', 'lastname']).scope.order_values.should == ['lastname ASC']
+      query(User, :order => ['firstname.desc', 'lastname']).scope.order_values.should == ['firstname DESC', 'lastname ASC']
     end
     
     it 'defines #query method on returned scoped' do
