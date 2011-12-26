@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scoped_from (0.3)
+    scoped_from (0.4)
       activerecord (~> 3.1.0)
       activesupport (~> 3.1.0)
 
