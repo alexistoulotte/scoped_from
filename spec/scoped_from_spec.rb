@@ -15,7 +15,7 @@ describe ScopedFrom do
     it 'is freezed' do
       expect {
         ScopedFrom.version.gsub!('.', '#')
-      }.to raise_error(TypeError, "can't modify frozen string")
+      }.to raise_error(/can't modify frozen string/i)
     end
     
   end
