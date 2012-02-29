@@ -9,8 +9,6 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 ActiveSupport::Dependencies.autoload_paths << "#{File.dirname(__FILE__)}/mocks"
 
 RSpec.configure do |config|
-  config.mock_with(:rspec)
-  
   config.include(UserMacro)
   
   config.before(:each) do
