@@ -25,7 +25,7 @@ module ScopedFrom
       end
       
       def scoped_from(params, options = {})
-        query_class = "#{name}Query".constantize rescue nil
+        query_class = "#{name}Query".safe_constantize
         query_class = Query unless query_class.is_a?(Class) && query_class.ancestors.include?(Query)
         query_class.new(self, params, options).scope
       end
