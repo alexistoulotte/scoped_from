@@ -146,4 +146,4 @@ Then into a view:
 ## Executing test suite
 
 This project is fully tested with [Rspec 2](http://github.com/rspec/rspec).
-Just run `rake` (after a `bundle install`).
+Just run `bundle exec rake` (after a `bundle install`).
