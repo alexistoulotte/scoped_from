@@ -1,13 +1,13 @@
 module ScopedFrom
-  
+
   class Query
 
     FALSE_VALUES = %w( false no n off 0 ).freeze
     ORDER_DIRECTIONS = %w( asc desc ).freeze
     TRUE_VALUES = %w( true yes y on 1 ).freeze
-    
+
     attr_reader :params
-    
+
     # Available options are: - :only : to restrict to specified keys.
     #                        - :except : to ignore specified keys.
     def initialize(scope, params, options = {})
@@ -15,15 +15,15 @@ module ScopedFrom
       @options = options
       self.params = params
     end
-    
+
     def order_column
       parse_order(params['order'])[:column]
     end
-    
+
     def order_direction
       parse_order(params['order'])[:direction]
     end
-    
+
     def scope
       scope = @scope
       params.each do |name, value|
@@ -33,9 +33,9 @@ module ScopedFrom
       end
       decorate_scope(scope)
     end
-    
+
     protected
-    
+
     def decorate_scope(scope)
       return scope if scope.respond_to?(:query)
       def scope.query
@@ -44,16 +44,16 @@ module ScopedFrom
       scope.instance_variable_set('@__query', self)
       scope
     end
-    
+
     def false?(value)
       FALSE_VALUES.include?(value.to_s.strip.downcase)
     end
-    
+
     def order_to_sql(value)
       order = parse_order(value)
       "#{order[:column]} #{order[:direction].upcase}" if order.present?
     end
-    
+
     def params=(params)
       params = params.params if params.is_a?(self.class)
       params = CGI.parse(params.to_s) unless params.is_a?(Hash)
@@ -82,14 +82,14 @@ module ScopedFrom
       @params.slice!(*[@options[:only]].flatten) if @options[:only].present?
       @params.except!(*[@options[:except]].flatten) if @options[:except].present?
     end
-    
+
     def parse_order(value)
       column, direction = value.to_s.split(/[\.:\s]+/, 2)
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
       @scope.column_names.include?(column) ? { :column => column, :direction => direction } : {}
     end
-    
+
     def parse_orders(values)
       [].tap do |orders|
         values.each do |value|
@@ -98,7 +98,7 @@ module ScopedFrom
         end
       end
     end
-    
+
     def scoped(scope, name, value)
       if name.to_s == 'order'
         scope.order(order_to_sql(value))
@@ -112,11 +112,11 @@ module ScopedFrom
         scope
       end
     end
-    
+
     def true?(value)
       TRUE_VALUES.include?(value.to_s.strip.downcase)
     end
-    
+
   end
-  
+
 end

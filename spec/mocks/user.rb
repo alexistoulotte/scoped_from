@@ -1,5 +1,5 @@
 class User < ActiveRecord::Base
-  
+
   scope :enabled, where(:enabled => true)
   scope :search, lambda { |pattern|
     where('firstname LIKE ? OR lastname LIKE ?', "%#{pattern}%", "%#{pattern}%")
@@ -10,5 +10,5 @@ class User < ActiveRecord::Base
   scope :latest, lambda {
     where('created_at >= ?', 1.week.ago)
   }
-  
+
 end
