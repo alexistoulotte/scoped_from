@@ -5,19 +5,11 @@ Provides a simple mapping between scopes and controller parameters for
 
 ## Installation
 
-### As a gem
-
 Just add this into your `Gemfile`:
 
     gem 'scoped_from'
 
 Then, just run `bundle install`.
-
-### As a plugin
-
-From your application path, execute:
-
-    rails plugin install git://github.com/alexistoulotte/scoped_from.git
 
 ## Example
 
