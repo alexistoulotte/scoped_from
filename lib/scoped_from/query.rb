@@ -2,9 +2,9 @@ module ScopedFrom
 
   class Query
 
-    FALSE_VALUES = %w( false no n off 0 ).freeze
-    ORDER_DIRECTIONS = %w( asc desc ).freeze
-    TRUE_VALUES = %w( true yes y on 1 ).freeze
+    FALSE_VALUES = %w(false no n off 0).freeze
+    ORDER_DIRECTIONS = %w(asc desc).freeze
+    TRUE_VALUES = %w(true yes y on 1).freeze
 
     attr_reader :params
 
