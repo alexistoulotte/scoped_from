@@ -1,5 +1,5 @@
 .DS_Store
 .bundle
-.rbenv-version
+.ruby-version
 pkg/*
 spec/test.sqlite3
