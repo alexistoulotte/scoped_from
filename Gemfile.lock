@@ -6,7 +6,7 @@ PATH
       activesupport (~> 3.2.0)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     activemodel (3.2.8)
       activesupport (= 3.2.8)
