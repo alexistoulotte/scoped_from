@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'scoped_from'
-  s.version = File.read("#{__dir__}/VERSION")).strip
+  s.version = File.read("#{File.dirname(__FILE__)}/VERSION").strip
   s.platform = Gem::Platform::RUBY
   s.author = 'Alexis Toulotte'
   s.email = 'al@alweb.org'
