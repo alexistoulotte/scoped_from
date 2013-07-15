@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/alexistoulotte/scoped_from'
   s.summary = 'Mapping between scopes and parameters for Rails'
   s.description = 'Provides a simple mapping between Active Record scopes and controller parameters for Ruby On Rails 3'
+  s.license = 'MIT'
 
   s.rubyforge_project = 'scoped_from'
 
