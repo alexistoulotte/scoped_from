@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'spec_helper'
 
 describe ScopedFrom::Query do
@@ -75,16 +73,16 @@ describe ScopedFrom::Query do
   describe '#order_column' do
 
     it 'is column specified into "order" parameter' do
-      query(User, :order => 'firstname').order_column.should == 'firstname'
-      query(User, :order => 'lastname.desc').order_column.should == 'lastname'
+      query(User, order: 'firstname').order_column.should == 'firstname'
+      query(User, order: 'lastname.desc').order_column.should == 'lastname'
     end
 
     it 'is nil if column does not exist' do
-      query(User, :order => 'foo').order_column.should be_nil
+      query(User, order: 'foo').order_column.should be_nil
     end
 
     it 'is nil if "order" param is not specified' do
-      query(User, :search => 'foo').order_column.should be_nil
+      query(User, search: 'foo').order_column.should be_nil
     end
 
   end
@@ -92,29 +90,29 @@ describe ScopedFrom::Query do
   describe '#order_direction' do
 
     it 'is direction specified into "order" parameter' do
-      query(User, :order => 'firstname.asc').order_direction.should == 'asc'
-      query(User, :order => 'firstname.desc').order_direction.should == 'desc'
+      query(User, order: 'firstname.asc').order_direction.should == 'asc'
+      query(User, order: 'firstname.desc').order_direction.should == 'desc'
     end
 
     it 'is "asc" if direction is not specified' do
-      query(User, :order => 'firstname').order_direction.should == 'asc'
+      query(User, order: 'firstname').order_direction.should == 'asc'
     end
 
     it 'is "asc" if direction is invalid' do
-      query(User, :order => 'firstname.foo').order_direction.should == 'asc'
+      query(User, order: 'firstname.foo').order_direction.should == 'asc'
     end
 
     it 'is direction even specified in another case' do
-      query(User, :order => 'firstname.ASc').order_direction.should == 'asc'
-      query(User, :order => 'firstname.DeSC').order_direction.should == 'desc'
+      query(User, order: 'firstname.ASc').order_direction.should == 'asc'
+      query(User, order: 'firstname.DeSC').order_direction.should == 'desc'
     end
 
     it 'is nil if column does not exist' do
-      query(User, :order => 'foo.desc').order_direction.should be_nil
+      query(User, order: 'foo.desc').order_direction.should be_nil
     end
 
     it 'is nil if "order" param is not specified' do
-      query(User, :search => 'foo').order_direction.should be_nil
+      query(User, search: 'foo').order_direction.should be_nil
     end
 
   end
@@ -164,7 +162,7 @@ describe ScopedFrom::Query do
     end
 
     it 'can have multiple values (from hash)' do
-      query(User, :search => ['bar', 'baz']).params.should == { 'search' => ['bar', 'baz'] }
+      query(User, search: ['bar', 'baz']).params.should == { 'search' => ['bar', 'baz'] }
     end
 
     it 'can have multiple values (from query string)' do
@@ -172,65 +170,65 @@ describe ScopedFrom::Query do
     end
 
     it 'converts value to true (or remove it) if scope takes no argument' do
-      query(User, :latest => 'y').params.should == { 'latest' => true }
-      query(User, :latest => 'no').params.should == {}
+      query(User, latest: 'y').params.should == { 'latest' => true }
+      query(User, latest: 'no').params.should == {}
     end
 
     it 'converts value to true (or false) if column is a boolean one' do
-      query(User, :admin => 'y').params.should == { 'admin' => true }
-      query(User, :admin => 'False').params.should == { 'admin' => false }
-      query(User, :admin => 'bar').params.should == {}
-      query(User, :admin => ['y', false]).params.should == {}
+      query(User, admin: 'y').params.should == { 'admin' => true }
+      query(User, admin: 'False').params.should == { 'admin' => false }
+      query(User, admin: 'bar').params.should == {}
+      query(User, admin: ['y', false]).params.should == {}
     end
 
     it 'converts array value to true (or remove it) if scope takes no argument' do
-      query(User, :latest => true).params.should == { 'latest' => true }
-      query(User, :latest => ['Yes']).params.should == { 'latest' => true }
-      query(User, :latest => ['no', 'yes']).params.should == {}
-      query(User, :latest => ['no', nil]).params.should == {}
-      query(User, :latest => ['fo']).params.should == {}
+      query(User, latest: true).params.should == { 'latest' => true }
+      query(User, latest: ['Yes']).params.should == { 'latest' => true }
+      query(User, latest: ['no', 'yes']).params.should == {}
+      query(User, latest: ['no', nil]).params.should == {}
+      query(User, latest: ['fo']).params.should == {}
     end
 
     it 'flats array' do
-      query(User, :search => [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => [nil, 'bar', '', 'foo', "\n ", 'baz'] }
+      query(User, search: [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => [nil, 'bar', '', 'foo', "\n ", 'baz'] }
     end
 
     it 'change array with a single value in one value' do
-      query(User, :search => ['bar']).params.should == { 'search' => 'bar' }
+      query(User, search: ['bar']).params.should == { 'search' => 'bar' }
     end
 
     it 'does not modify given hash' do
-      hash = { :search => 'foo', :enabled => '1', :bar => 'foo' }
+      hash = { search: 'foo', enabled: '1', bar: 'foo' }
       query(User, hash)
-      hash.should == { :search => 'foo', :enabled => '1', :bar => 'foo' }
+      hash.should == { search: 'foo', enabled: '1', bar: 'foo' }
     end
 
     it 'does not modify given array' do
       items = ['bar', 'foo', nil]
-      query(User, :search => items)
+      query(User, search: items)
       items.should == ['bar', 'foo', nil]
     end
 
     it 'accepts :only option' do
-      query(User, { :search => 'bar', :enabled => 'true' }, :only => [:search]).params.should == { 'search' => 'bar' }
-      query(User, { :search => 'bar', :enabled => 'true' }, :only => 'search').params.should == { 'search' => 'bar' }
-      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => 'true' }, :only => 'search').params.should == { 'search' => 'bar' }
-      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => 'true' }, :only => ['search', :firstname]).params.should == { 'search' => 'bar', 'firstname' => 'Jane' }
+      query(User, { search: 'bar', enabled: 'true' }, only: [:search]).params.should == { 'search' => 'bar' }
+      query(User, { search: 'bar', enabled: 'true' }, only: 'search').params.should == { 'search' => 'bar' }
+      query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: 'search').params.should == { 'search' => 'bar' }
+      query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: ['search', :firstname]).params.should == { 'search' => 'bar', 'firstname' => 'Jane' }
     end
 
     it 'accepts :except option' do
-      query(User, { :search => 'bar', :enabled => true }, :except => [:search]).params.should == { 'enabled' => true }
-      query(User, { :search => 'bar', :enabled => true }, :except => 'search').params.should == { 'enabled' => true }
-      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => true }, :except => 'search').params.should == { 'enabled' => true, 'firstname' => 'Jane' }
-      query(User, { :search => 'bar', :firstname => 'Jane', :enabled => true }, :except => ['search', :firstname]).params.should == { 'enabled' => true }
+      query(User, { search: 'bar', enabled: true }, except: [:search]).params.should == { 'enabled' => true }
+      query(User, { search: 'bar', enabled: true }, except: 'search').params.should == { 'enabled' => true }
+      query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: 'search').params.should == { 'enabled' => true, 'firstname' => 'Jane' }
+      query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: ['search', :firstname]).params.should == { 'enabled' => true }
     end
 
     it 'accepts a query instance' do
-      query(User, query(User, :search => 'toto')).params.should == { 'search' => 'toto' }
+      query(User, query(User, search: 'toto')).params.should == { 'search' => 'toto' }
     end
 
     it 'preserve blank values' do
-      query(User, { :search => "\n ", 'enabled' => true }).params.should == { 'search' => "\n ", 'enabled' => true }
+      query(User, { search: "\n ", 'enabled' => true }).params.should == { 'search' => "\n ", 'enabled' => true }
     end
 
     it 'preserve blank values from array' do

@@ -63,25 +63,25 @@ describe ScopedFrom::ActiveRecord do
   describe '#scoped_from' do
 
     it 'just build a new query and return its scope' do
-      query = mock(:query)
+      query = double(:query)
       query.should_receive(:scope).and_return(42)
-      ScopedFrom::Query.should_receive(:new).with(User, 'foo', :except => 'bam').and_return(query)
-      User.scoped_from('foo', :except => 'bam').should == 42
+      ScopedFrom::Query.should_receive(:new).with(User, 'foo', except: 'bam').and_return(query)
+      User.scoped_from('foo', except: 'bam').should == 42
     end
 
     it 'build scopes' do
-      User.scoped_from(:search => 'jane').should == [users(:jane)]
-      User.scoped_from(:search => 'john').should == [users(:john)]
+      User.scoped_from(search: 'jane').should == [users(:jane)]
+      User.scoped_from(search: 'john').should == [users(:john)]
     end
 
     it 'can be chained with other scopes' do
-      User.scoped_from(:search => 'jane').should == [users(:jane)]
-      User.enabled.scoped_from(:search => 'jane').should == []
+      User.scoped_from(search: 'jane').should == [users(:jane)]
+      User.enabled.scoped_from(search: 'jane').should == []
     end
 
     it 'can be used with order as parameter' do
-      User.scoped_from(:order => 'firstname').first.should == users(:jane)
-      User.scoped_from(:order => 'firstname.desc').first.should == users(:john)
+      User.scoped_from(order: 'firstname').first.should == users(:jane)
+      User.scoped_from(order: 'firstname.desc').first.should == users(:john)
     end
 
     it 'builds a ScopedFrom::Query' do
@@ -98,7 +98,7 @@ describe ScopedFrom::ActiveRecord do
 
     it 'builds a #{Class}Query if #{RecordClassName}Query is defined and is a ScopedFrom::Query' do
       Comment.scoped_from({}).query.class.should be(CommentQuery)
-      Comment.where(:foo => 'bar').scoped_from({}).query.class.should be(CommentQuery)
+      Comment.where(foo: 'bar').scoped_from({}).query.class.should be(CommentQuery)
       CommentQuery.should be_a(Class)
       CommentQuery.ancestors.should include(ScopedFrom::Query)
     end

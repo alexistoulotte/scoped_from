@@ -87,7 +87,7 @@ module ScopedFrom
       column, direction = value.to_s.split(/[\.:\s]+/, 2)
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
-      @scope.column_names.include?(column) ? { :column => column, :direction => direction } : {}
+      @scope.column_names.include?(column) ? { column: column, direction: direction } : {}
     end
 
     def parse_orders(values)
@@ -107,7 +107,7 @@ module ScopedFrom
       elsif scope.scope_without_argument?(name)
         scope.send(name)
       elsif scope.column_names.include?(name.to_s)
-        scope.scoped(:conditions => { name => value })
+        scope.scoped(conditions: { name => value })
       else
         scope
       end
