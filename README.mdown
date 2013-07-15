@@ -64,21 +64,21 @@ Columns are also automatically scoped.
 
 You can restrict mapping to some scopes with `:only` option:
 
-    @posts = Post.scoped_from(params, :only => ['commented', 'search'])
+    @posts = Post.scoped_from(params, only: ['commented', 'search'])
 
 You can also exclude some scopes from mapping with `:except` option:
 
-    @posts = Post.scoped_from(params, :except => 'commented')
+    @posts = Post.scoped_from(params, except: 'commented')
 
 ## Mapping order
 
 If you need to map an SQL order, just pass `order` parameter:
 
-    @posts = Post.scoped_from(:order => 'created_at')
+    @posts = Post.scoped_from(order: 'created_at')
 
 Order direction can be specified using a dot, space or `:` as delimiter:
     
-    @posts = Post.scoped_from(:order => 'created_at.desc')
+    @posts = Post.scoped_from(order: 'created_at.desc')
 
 Note that order is SQL safe with `scoped_from` method (columns names are
 checked).
@@ -88,7 +88,7 @@ checked).
 If your provide an array as parameter value, scope is invoked with each item
 of the array:
 
-    @posts = Post.scoped_from(:search => ['bar', 'foo'])
+    @posts = Post.scoped_from(search: ['bar', 'foo'])
     
 is equivalent to
     
@@ -97,7 +97,7 @@ is equivalent to
 You may also not want to filter on columns, just specify `:exclude_columns`
 option:
 
-    @posts = Post.scoped_from(params, :exclude_columns => true)
+    @posts = Post.scoped_from(params, exclude_columns: true)
 
 A query string can also be given to `scoped_from` method:
 
