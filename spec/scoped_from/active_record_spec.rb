@@ -64,7 +64,7 @@ describe ScopedFrom::ActiveRecord do
 
     it 'just build a new query and return its scope' do
       query = double(:query)
-      query.should_receive(:scope).and_return(42)
+      query.should_receive(:relation).and_return(42)
       ScopedFrom::Query.should_receive(:new).with(User, 'foo', except: 'bam').and_return(query)
       User.scoped_from('foo', except: 'bam').should == 42
     end

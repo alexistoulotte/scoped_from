@@ -10,9 +10,9 @@ module ScopedFrom
 
     # Available options are: - :only : to restrict to specified keys.
     #                        - :except : to ignore specified keys.
-    def initialize(scope, params, options = {})
-      @scope = scope.scoped
-      @options = options
+    def initialize(relation, params, options = {})
+      self.relation = relation
+      self.options = options
       self.params = params
     end
 
@@ -24,34 +24,52 @@ module ScopedFrom
       parse_order(params['order'])[:direction]
     end
 
-    def scope
-      scope = @scope
+    def relation
+      relation = @relation
       params.each do |name, value|
         [value].flatten.each do |value|
-          scope = scoped(scope, name, value)
+          relation = invoke_param(relation, name, value)
         end
       end
-      decorate_scope(scope)
+      decorate_relation(relation)
     end
 
     protected
 
-    def decorate_scope(scope)
-      return scope if scope.respond_to?(:query)
-      def scope.query
+    def decorate_relation(relation)
+      return relation if relation.respond_to?(:query)
+      def relation.query
         @__query
       end
-      scope.instance_variable_set('@__query', self)
-      scope
+      relation.instance_variable_set('@__query', self)
+      relation
+    end
+
+    def invoke_param(relation, name, value)
+      if name.to_s == 'order'
+        relation.order(order_to_hash(value))
+      elsif relation.scope_with_one_argument?(name)
+        relation.send(name, value)
+      elsif relation.scope_without_argument?(name)
+        relation.send(name)
+      elsif relation.column_names.include?(name.to_s)
+        relation.where(name => value)
+      else
+        relation
+      end
     end
 
     def false?(value)
       FALSE_VALUES.include?(value.to_s.strip.downcase)
     end
 
-    def order_to_sql(value)
+    def options=(options)
+      @options = options.symbolize_keys
+    end
+
+    def order_to_hash(value)
       order = parse_order(value)
-      "#{order[:column]} #{order[:direction].upcase}" if order.present?
+      order.present? ? { order[:column] => order[:direction].downcase.to_sym } : {}
     end
 
     def params=(params)
@@ -64,13 +82,13 @@ module ScopedFrom
         if name.to_s == 'order'
           orders = parse_orders(values).map { |order| "#{order[:column]}.#{order[:direction]}" }
           @params[name] = (orders.many? ? orders : orders.first) if orders.any?
-        elsif @scope.scope_without_argument?(name)
+        elsif @relation.scope_without_argument?(name)
           @params[name] = true if values.all? { |value| true?(value) }
-        elsif @scope.scope_with_one_argument?(name)
+        elsif @relation.scope_with_one_argument?(name)
           value = values.many? ? values : values.first
           @params[name] = @params[name] ? [@params[name], value].flatten : value
-        elsif @options[:exclude_columns].blank? && @scope.column_names.include?(name.to_s)
-          if @scope.columns_hash[name.to_s].type == :boolean
+        elsif @options[:exclude_columns].blank? && @relation.column_names.include?(name.to_s)
+          if @relation.columns_hash[name.to_s].type == :boolean
             @params[name] = true if values.all? { |value| true?(value) }
             @params[name] = false if values.all? { |value| false?(value) }
           else
@@ -87,30 +105,20 @@ module ScopedFrom
       column, direction = value.to_s.split(/[\.:\s]+/, 2)
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
-      @scope.column_names.include?(column) ? { column: column, direction: direction } : {}
+      @relation.column_names.include?(column) ? { column: column, direction: direction } : {}
     end
 
     def parse_orders(values)
       [].tap do |orders|
-        values.each do |value|
+        values.reverse.each do |value|
           order = parse_order(value)
           orders << order if order.present? && !orders.any? { |o| o[:column] == order[:column] }
         end
       end
     end
 
-    def scoped(scope, name, value)
-      if name.to_s == 'order'
-        scope.order(order_to_sql(value))
-      elsif scope.scope_with_one_argument?(name)
-        scope.send(name, value)
-      elsif scope.scope_without_argument?(name)
-        scope.send(name)
-      elsif scope.column_names.include?(name.to_s)
-        scope.scoped(conditions: { name => value })
-      else
-        scope
-      end
+    def relation=(relation)
+      @relation = relation.is_a?(Class) ? relation.all : relation
     end
 
     def true?(value)

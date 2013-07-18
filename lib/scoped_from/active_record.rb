@@ -21,13 +21,13 @@ module ScopedFrom
       end
 
       def scope_without_argument?(name)
-        [-1, 0].include?(scope_arities[name])
+        scope_arities[name] == 0
       end
 
       def scoped_from(params, options = {})
         query_class = "#{name}Query".safe_constantize
         query_class = Query unless query_class.is_a?(Class) && query_class.ancestors.include?(Query)
-        query_class.new(self, params, options).scope
+        query_class.new(self, params, options).relation
       end
 
     end

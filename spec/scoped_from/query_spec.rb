@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe ScopedFrom::Query do
 
-  def query(scope = User, params = {}, options = {})
-    ScopedFrom::Query.new(scope, params, options)
+  def query(relation = User, params = {}, options = {})
+    ScopedFrom::Query.new(relation, params, options)
   end
 
   describe '#false?' do
@@ -63,9 +63,60 @@ describe ScopedFrom::Query do
 
   describe '#initialize' do
 
-    it 'invokes #scoped method on specified scope' do
-      User.should_receive(:scoped)
+    it 'invokes .all method on given class' do
+      User.should_receive(:all)
       ScopedFrom::Query.new(User, {})
+    end
+
+    it 'does not invokes .all method on given relation' do
+      relation = User.all
+      relation.should_not_receive(:all)
+      ScopedFrom::Query.new(relation, {})
+    end
+
+  end
+
+  describe '#invoke_param' do
+
+    it 'returns given scope if it has no scope with specified name' do
+      query.send(:invoke_param, User, :foo, true).should == User
+    end
+
+    it 'returns given scope if scope takes more than 1 argument' do
+      query.send(:invoke_param, User, :created_between, true).should == User
+    end
+
+    it 'invokes scope without arguments if scope takes no arguments' do
+      query.send(:invoke_param, User.all, :enabled, true).should == [users(:john)]
+      query.send(:invoke_param, User.all, :enabled, ' 1 ').should == [users(:john)]
+      query.send(:invoke_param, User.all, :enabled, 'off').should == [users(:john)]
+    end
+
+    it 'invokes scope with value has argument if scope takes one argument' do
+      query.send(:invoke_param, User.all, :search, 'doe').should == [users(:john), users(:jane)]
+      query.send(:invoke_param, User.all, :search, 'john').should == [users(:john)]
+      query.send(:invoke_param, User.all, :search, 'jane').should == [users(:jane)]
+    end
+
+    it 'scope on column conditions' do
+      query.send(:invoke_param, User.all, :firstname, 'Jane').should == [users(:jane)]
+    end
+
+    it 'invokes "order"' do
+      query.send(:invoke_param, User.all, :order, 'firstname.asc').should == [users(:jane), users(:john)]
+      query.send(:invoke_param, User.all, :order, 'firstname.desc').should == [users(:john), users(:jane)]
+    end
+
+  end
+
+  describe '#options' do
+
+    it 'is set at initialization' do
+      ScopedFrom::Query.new(User, {}, bar: 'foo').instance_variable_get(:@options).should == { bar: 'foo' }
+    end
+
+    it 'keys are symbolized' do
+      ScopedFrom::Query.new(User, {}, 'bar' => 'foo').instance_variable_get(:@options).should == { bar: 'foo' }
     end
 
   end
@@ -288,10 +339,10 @@ describe ScopedFrom::Query do
     end
 
     it 'many order can be specified' do
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
-      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.asc' }
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
-      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['lastname.desc', 'firstname.asc'] }
+      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.desc' }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.desc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.desc', 'lastname.desc'] }
     end
 
     it 'order can be delimited by a space' do
@@ -313,41 +364,41 @@ describe ScopedFrom::Query do
 
   end
 
-  describe '#scope' do
+  describe '#relation' do
 
     it 'does not execute any query' do
       User.should_not_receive(:connection)
-      query(User, :enabled => true).scope
+      query(User, :enabled => true).relation
     end
 
     it 'works with scopes with a lambda without arguments' do
       users(:jane).update_attribute(:created_at, 10.days.ago)
-      query(User, :latest => true).scope.should == [users(:john)]
-      query(User, :latest => false).scope.should == [users(:john), users(:jane)]
+      query(User, :latest => true).relation.should == [users(:john)]
+      query(User, :latest => false).relation.should == [users(:john), users(:jane)]
     end
 
-    it 'does not modify scope specified at initialization' do
-      scope = User.search('foo')
-      q = query(scope, :enabled => true)
+    it 'does not modify relation specified at initialization' do
+      relation = User.search('foo')
+      q = query(relation, :enabled => true)
       expect {
         expect {
-          q.scope
-        }.to_not change { q.instance_variable_get('@scope') }
-      }.to_not change { scope }
+          q.relation
+        }.to_not change { q.instance_variable_get('@relation') }
+      }.to_not change { relation }
     end
 
-    it 'returns scope (#scoped) specified at construction if params are empty' do
-      query.scope.should_not == User
-      query.scope.should == User.scoped
+    it 'returns relation specified at construction if params are empty' do
+      query.relation.should_not == User
+      query.relation.should == User.all
     end
 
-    it 'invokes many times scope if an array is given' do
-      query(User, :search => ['John', 'Doe']).scope.should == [users(:john)]
-      query(User, :search => ['John', 'Done']).scope.should == []
+    it 'invokes many times relation if an array is given' do
+      query(User, :search => ['John', 'Doe']).relation.should == [users(:john)]
+      query(User, :search => ['John', 'Done']).relation.should == []
       query(User, :search => ['John', 'Doe']).params.should == { 'search' => ['John', 'Doe'] }
     end
 
-    it 'invokes many times scope if given twice (as string & symbol)' do
+    it 'invokes many times relation if given twice (as string & symbol)' do
       query(User, :search => 'John', 'search' => 'Done').params['search'].size.should be(2)
       query(User, :search => 'John', 'search' => 'Done').params['search'].should include('John', 'Done')
 
@@ -357,59 +408,29 @@ describe ScopedFrom::Query do
     end
 
     it 'invokes last order if an array is given' do
-      query(User, :order => ['lastname', 'firstname']).scope.should == [users(:jane), users(:john)]
-      query(User, :order => ['lastname', 'firstname.desc']).scope.should == [users(:john), users(:jane)]
-      query(User, :order => ['firstname.desc', 'lastname']).scope.order_values.should == ['firstname DESC', 'lastname ASC']
+      create_user(:jane2, firstname: 'Jane', lastname: 'Zoe')
+
+      query(User, :order => ['lastname', 'firstname']).relation.should == [users(:jane), users(:john), users(:jane2)]
+      query(User, :order => ['lastname', 'firstname.desc']).relation.should == [users(:john), users(:jane), users(:jane2)]
+      query(User, :order => ['firstname', 'lastname.desc']).relation.should == [users(:jane2), users(:jane), users(:john)]
+      query(User, :order => ['firstname.desc', 'lastname']).relation.order_values.should == [{ 'firstname' => :desc }, { 'lastname' => :asc }]
     end
 
-    it 'defines #query method on returned scoped' do
-      query(User).scope.should respond_to(:query)
+    it 'defines #query method on returned relation' do
+      query(User).relation.should respond_to(:query)
     end
 
-    it 'does not define #query method for future scopes' do
-      query(User).scope.query.should be_present
+    it 'does not define #query method for future relations' do
+      query(User).relation.query.should be_present
       User.should_not respond_to(:query)
-      User.scoped.should_not respond_to(:query)
+      User.all.should_not respond_to(:query)
       User.enabled.should_not respond_to(:query)
     end
 
     it 'defined #query method returns query' do
       q = query(User)
-      q.scope.query.should be_a(ScopedFrom::Query)
-      q.scope.query.should be(q)
-    end
-
-  end
-
-  describe '#scoped' do
-
-    it 'returns given scope if it has no scope with specified name' do
-      query.send(:scoped, User, :foo, true).should == User
-    end
-
-    it 'returns given scope if scope takes more than 1 argument' do
-      query.send(:scoped, User, :created_between, true).should == User
-    end
-
-    it 'invokes scope without arguments if scope takes no arguments' do
-      query.send(:scoped, User.scoped, :enabled, true).should == [users(:john)]
-      query.send(:scoped, User.scoped, :enabled, ' 1 ').should == [users(:john)]
-      query.send(:scoped, User.scoped, :enabled, 'off').should == [users(:john)]
-    end
-
-    it 'invokes scope with value has argument if scope takes one argument' do
-      query.send(:scoped, User.scoped, :search, 'doe').should == [users(:john), users(:jane)]
-      query.send(:scoped, User.scoped, :search, 'john').should == [users(:john)]
-      query.send(:scoped, User.scoped, :search, 'jane').should == [users(:jane)]
-    end
-
-    it 'scope on column conditions' do
-      query.send(:scoped, User.scoped, :firstname, 'Jane').should == [users(:jane)]
-    end
-
-    it 'invokes "order"' do
-      query.send(:scoped, User.scoped, :order, 'firstname.asc').should == [users(:jane), users(:john)]
-      query.send(:scoped, User.scoped, :order, 'firstname.desc').should == [users(:john), users(:jane)]
+      q.relation.query.should be_a(ScopedFrom::Query)
+      q.relation.query.should be(q)
     end
 
   end
