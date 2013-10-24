@@ -16,35 +16,35 @@ Then, just run `bundle install`.
 First, a model with some scopes:
 
     class Post < ActiveRecord::Base
-    
+
       scope :commented, where('comments_count > 0')
 
       scope :created_between, lambda { |after, before|
         where('created_at >= ? AND created_at <= ?', after, before)
       }
-      
+
       scope :search, lambda { |pattern|
         where('body LIKE ?', "%#{pattern}%")
       }
-      
+
       scope :with_category, lambda { |category_id|
         where(:category_id, category_id)
       }
-    
+
     end
-    
+
 After, a controller:
-    
+
     class PostsController < ActionController::Base
-    
+
       def index
         @posts = Post.scoped_from(params)
       end
-    
+
     end
-    
+
 Then, it just filter your model from params:
-    
+
     /posts?commented=1
     /posts?search=rails
     /posts?search=rails&commented=1&with_category=42
@@ -77,7 +77,7 @@ If you need to map an SQL order, just pass `order` parameter:
     @posts = Post.scoped_from(order: 'created_at')
 
 Order direction can be specified using a dot, space or `:` as delimiter:
-    
+
     @posts = Post.scoped_from(order: 'created_at.desc')
 
 Note that order is SQL safe with `scoped_from` method (columns names are
@@ -89,9 +89,9 @@ If your provide an array as parameter value, scope is invoked with each item
 of the array:
 
     @posts = Post.scoped_from(search: ['bar', 'foo'])
-    
+
 is equivalent to
-    
+
     @posts = Post.search('bar').search('foo')
 
 You may also not want to filter on columns, just specify `:exclude_columns`
@@ -118,15 +118,15 @@ subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. Here is an
 example:
 
     class PostQuery < ScopedFrom::Query
-    
+
       def category
         Category.find_by_id(params[:with_category]) if params[:with_category]
       end
-    
+
     end
 
 This class has to be in load path.
-    
+
 Then into a view:
 
     <% if @query.category %>
