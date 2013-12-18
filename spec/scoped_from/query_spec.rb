@@ -171,17 +171,17 @@ describe ScopedFrom::Query do
   describe '#params' do
 
     it 'returns params specified at initialization' do
-      query(User, :search => 'foo', 'enabled' => true).params.should == { 'search' => 'foo', 'enabled' => true }
+      query(User, search: 'foo', 'enabled' => true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
 
     it 'returns an hash with indifferent access' do
       query(User, 'search' => 'bar').params.should be_a(ActiveSupport::HashWithIndifferentAccess)
       query(User, 'search' => 'bar').params[:search].should == 'bar'
-      query(User, :search => 'bar').params['search'].should == 'bar'
+      query(User, search: 'bar').params['search'].should == 'bar'
     end
 
     it 'can be converted to query string' do
-      query(User, :search => ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search%5B%5D=foo&search%5B%5D=bar'
+      query(User, search: ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search%5B%5D=foo&search%5B%5D=bar'
     end
 
   end
@@ -193,7 +193,7 @@ describe ScopedFrom::Query do
     end
 
     it 'removes values that are not scopes' do
-      query(User, :foo => 'bar', 'search' => 'foo', :enabled => true).params.should == { 'search' => 'foo', 'enabled' => true }
+      query(User, foo: 'bar', 'search' => 'foo', enabled: true).params.should == { 'search' => 'foo', 'enabled' => true }
     end
 
     it 'is case sensitive' do
@@ -293,16 +293,16 @@ describe ScopedFrom::Query do
 
     it 'includes column values' do
       query(User, 'firstname' => 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
-      query(User, :firstname => 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
+      query(User, firstname: 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
     end
 
     it 'exclude column values if :exclude_columns option is specified' do
-      query(User, { :enabled => true, 'firstname' => 'Jane', 'foo' => 'bar' }, :exclude_columns => true).params.should == { 'enabled' => true }
-      query(User, { :enabled => true, :firstname => 'Jane', :foo => 'bar' }, :exclude_columns => true).params.should == { 'enabled' => true }
+      query(User, { enabled: true, 'firstname' => 'Jane', 'foo' => 'bar' }, exclude_columns: true).params.should == { 'enabled' => true }
+      query(User, { enabled: true, firstname: 'Jane', foo: 'bar' }, exclude_columns: true).params.should == { 'enabled' => true }
     end
 
     it 'scopes have priority on columns' do
-      query(User, :enabled => false).params.should == {}
+      query(User, enabled: false).params.should == {}
     end
 
     it 'maps an "order"' do
@@ -331,7 +331,7 @@ describe ScopedFrom::Query do
     end
 
     it 'order can be specified as symbol' do
-      query(User, { :order => 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
+      query(User, { order: 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
     end
 
     it "order is case sensitive" do
@@ -339,10 +339,10 @@ describe ScopedFrom::Query do
     end
 
     it 'many order can be specified' do
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['lastname.desc', 'firstname.asc'] }
-      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.desc' }
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.desc', 'lastname.desc'] }
-      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.desc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.asc' }
+      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
     end
 
     it 'order can be delimited by a space' do
@@ -368,18 +368,18 @@ describe ScopedFrom::Query do
 
     it 'does not execute any query' do
       User.should_not_receive(:connection)
-      query(User, :enabled => true).relation
+      query(User, enabled: true).relation
     end
 
     it 'works with scopes with a lambda without arguments' do
       users(:jane).update_attribute(:created_at, 10.days.ago)
-      query(User, :latest => true).relation.should == [users(:john)]
-      query(User, :latest => false).relation.should == [users(:john), users(:jane)]
+      query(User, latest: true).relation.should == [users(:john)]
+      query(User, latest: false).relation.should == [users(:john), users(:jane)]
     end
 
     it 'does not modify relation specified at initialization' do
       relation = User.search('foo')
-      q = query(relation, :enabled => true)
+      q = query(relation, enabled: true)
       expect {
         expect {
           q.relation
@@ -393,27 +393,27 @@ describe ScopedFrom::Query do
     end
 
     it 'invokes many times relation if an array is given' do
-      query(User, :search => ['John', 'Doe']).relation.should == [users(:john)]
-      query(User, :search => ['John', 'Done']).relation.should == []
-      query(User, :search => ['John', 'Doe']).params.should == { 'search' => ['John', 'Doe'] }
+      query(User, search: ['John', 'Doe']).relation.should == [users(:john)]
+      query(User, search: ['John', 'Done']).relation.should == []
+      query(User, search: ['John', 'Doe']).params.should == { 'search' => ['John', 'Doe'] }
     end
 
     it 'invokes many times relation if given twice (as string & symbol)' do
-      query(User, :search => 'John', 'search' => 'Done').params['search'].size.should be(2)
-      query(User, :search => 'John', 'search' => 'Done').params['search'].should include('John', 'Done')
+      query(User, search: 'John', 'search' => 'Done').params['search'].size.should be(2)
+      query(User, search: 'John', 'search' => 'Done').params['search'].should include('John', 'Done')
 
 
-      query(User, :search => 'John', 'search' => ['Did', 'Done']).params['search'].size.should be(3)
-      query(User, :search => 'John', 'search' => ['Did', 'Done']).params['search'].should include('John', 'Did', 'Done')
+      query(User, search: 'John', 'search' => ['Did', 'Done']).params['search'].size.should be(3)
+      query(User, search: 'John', 'search' => ['Did', 'Done']).params['search'].should include('John', 'Did', 'Done')
     end
 
     it 'invokes last order if an array is given' do
       create_user(:jane2, firstname: 'Jane', lastname: 'Zoe')
 
-      query(User, :order => ['lastname', 'firstname']).relation.should == [users(:jane), users(:john), users(:jane2)]
-      query(User, :order => ['lastname', 'firstname.desc']).relation.should == [users(:john), users(:jane), users(:jane2)]
-      query(User, :order => ['firstname', 'lastname.desc']).relation.should == [users(:jane2), users(:jane), users(:john)]
-      query(User, :order => ['firstname.desc', 'lastname']).relation.order_values.should == [{ 'firstname' => :desc }, { 'lastname' => :asc }]
+      query(User, order: ['lastname', 'firstname']).relation.should == [users(:jane), users(:john), users(:jane2)]
+      query(User, order: ['lastname', 'firstname.desc']).relation.should == [users(:john), users(:jane), users(:jane2)]
+      query(User, order: ['firstname', 'lastname.desc']).relation.should == [users(:jane2), users(:jane), users(:john)]
+      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.should == [{ 'firstname' => :desc }, { 'lastname' => :asc }]
     end
 
     it 'defines #query method on returned relation' do

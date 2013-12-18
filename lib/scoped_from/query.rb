@@ -110,7 +110,7 @@ module ScopedFrom
 
     def parse_orders(values)
       [].tap do |orders|
-        values.reverse.each do |value|
+        values.each do |value|
           order = parse_order(value)
           orders << order if order.present? && !orders.any? { |o| o[:column] == order[:column] }
         end
