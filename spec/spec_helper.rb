@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] ||= 'test'
 
 require File.expand_path("#{__dir__}/../lib/scoped_from")
+require 'byebug'
 
 # Support
 Dir["#{__dir__}/support/**/*.rb"].each { |f| require File.expand_path(f) }

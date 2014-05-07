@@ -413,7 +413,8 @@ describe ScopedFrom::Query do
       query(User, order: ['lastname', 'firstname']).relation.should == [users(:jane), users(:john), users(:jane2)]
       query(User, order: ['lastname', 'firstname.desc']).relation.should == [users(:john), users(:jane), users(:jane2)]
       query(User, order: ['firstname', 'lastname.desc']).relation.should == [users(:jane2), users(:jane), users(:john)]
-      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.should == [{ 'firstname' => :desc }, { 'lastname' => :asc }]
+      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:class).should == [Arel::Nodes::Descending, Arel::Nodes::Ascending]
+      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:expr).map(&:name).should == ['firstname', 'lastname']
     end
 
     it 'defines #query method on returned relation' do
