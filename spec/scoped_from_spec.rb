@@ -4,13 +4,10 @@ describe ScopedFrom do
 
   describe '.version' do
 
-    it 'is a string' do
-      ScopedFrom.version.should be_a(String)
-    end
+    subject { ScopedFrom.version }
 
-    it 'is with correct format' do
-      ScopedFrom.version.should match(/^\d+\.\d+(\.\d+)?/)
-    end
+    it { should be_a(String) }
+    it { should match(/^\d+\.\d+(\.\d+)?/) }
 
     it 'is freezed' do
       expect {

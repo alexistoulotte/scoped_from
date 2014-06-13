@@ -9,54 +9,54 @@ describe ScopedFrom::Query do
   describe '#false?' do
 
     it 'is true if false is given' do
-      query.send(:false?, false).should be_true
+      expect(query.send(:false?, false)).to be(true)
     end
 
     it 'is true if "false" is given' do
-      query.send(:false?, 'false').should be_true
-      query.send(:false?, 'False').should be_true
+      expect(query.send(:false?, 'false')).to be(true)
+      expect(query.send(:false?, 'False')).to be(true)
     end
 
     it 'is true if "0" is given' do
-      query.send(:false?, '0').should be_true
+      expect(query.send(:false?, '0')).to be(true)
     end
 
     it 'is true if "off" is given' do
-      query.send(:false?, 'off').should be_true
-      query.send(:false?, 'OFF ').should be_true
+      expect(query.send(:false?, 'off')).to be(true)
+      expect(query.send(:false?, 'OFF ')).to be(true)
     end
 
     it 'is true if "no" is given' do
-      query.send(:false?, 'no').should be_true
-      query.send(:false?, ' No ').should be_true
+      expect(query.send(:false?, 'no')).to be(true)
+      expect(query.send(:false?, ' No ')).to be(true)
     end
 
     it 'is true if "n" is given' do
-      query.send(:false?, 'n').should be_true
-      query.send(:false?, 'N ').should be_true
+      expect(query.send(:false?, 'n')).to be(true)
+      expect(query.send(:false?, 'N ')).to be(true)
     end
 
     it 'is false if true is given' do
-      query.send(:false?, true).should be_false
+      expect(query.send(:false?, true)).to be(false)
     end
 
     it 'is false if "true" is given' do
-      query.send(:false?, 'true').should be_false
-      query.send(:false?, 'TrUe').should be_false
+      expect(query.send(:false?, 'true')).to be(false)
+      expect(query.send(:false?, 'TrUe')).to be(false)
     end
 
     it 'is false if "1" is given' do
-      query.send(:false?, '1').should be_false
+      expect(query.send(:false?, '1')).to be(false)
     end
 
     it 'is false if "on" is given' do
-      query.send(:false?, "on").should be_false
-      query.send(:false?, "On").should be_false
+      expect(query.send(:false?, "on")).to be(false)
+      expect(query.send(:false?, "On")).to be(false)
     end
 
     it 'is false otherwise' do
-      query.send(:false?, 42).should be_false
-      query.send(:false?, 'bam').should be_false
+      expect(query.send(:false?, 42)).to be(false)
+      expect(query.send(:false?, 'bam')).to be(false)
     end
 
   end
@@ -64,13 +64,13 @@ describe ScopedFrom::Query do
   describe '#initialize' do
 
     it 'invokes .all method on given class' do
-      User.should_receive(:all)
+      expect(User).to receive(:all)
       ScopedFrom::Query.new(User, {})
     end
 
     it 'does not invokes .all method on given relation' do
       relation = User.all
-      relation.should_not_receive(:all)
+      expect(relation).not_to receive(:all)
       ScopedFrom::Query.new(relation, {})
     end
 
@@ -79,32 +79,32 @@ describe ScopedFrom::Query do
   describe '#invoke_param' do
 
     it 'returns given scope if it has no scope with specified name' do
-      query.send(:invoke_param, User, :foo, true).should == User
+      expect(query.send(:invoke_param, User, :foo, true)).to eq(User)
     end
 
     it 'returns given scope if scope takes more than 1 argument' do
-      query.send(:invoke_param, User, :created_between, true).should == User
+      expect(query.send(:invoke_param, User, :created_between, true)).to eq(User)
     end
 
     it 'invokes scope without arguments if scope takes no arguments' do
-      query.send(:invoke_param, User.all, :enabled, true).should == [users(:john)]
-      query.send(:invoke_param, User.all, :enabled, ' 1 ').should == [users(:john)]
-      query.send(:invoke_param, User.all, :enabled, 'off').should == [users(:john)]
+      expect(query.send(:invoke_param, User.all, :enabled, true)).to eq([users(:john)])
+      expect(query.send(:invoke_param, User.all, :enabled, ' 1 ')).to eq([users(:john)])
+      expect(query.send(:invoke_param, User.all, :enabled, 'off')).to eq([users(:john)])
     end
 
     it 'invokes scope with value has argument if scope takes one argument' do
-      query.send(:invoke_param, User.all, :search, 'doe').should == [users(:john), users(:jane)]
-      query.send(:invoke_param, User.all, :search, 'john').should == [users(:john)]
-      query.send(:invoke_param, User.all, :search, 'jane').should == [users(:jane)]
+      expect(query.send(:invoke_param, User.all, :search, 'doe')).to eq([users(:john), users(:jane)])
+      expect(query.send(:invoke_param, User.all, :search, 'john')).to eq([users(:john)])
+      expect(query.send(:invoke_param, User.all, :search, 'jane')).to eq([users(:jane)])
     end
 
     it 'scope on column conditions' do
-      query.send(:invoke_param, User.all, :firstname, 'Jane').should == [users(:jane)]
+      expect(query.send(:invoke_param, User.all, :firstname, 'Jane')).to eq([users(:jane)])
     end
 
     it 'invokes "order"' do
-      query.send(:invoke_param, User.all, :order, 'firstname.asc').should == [users(:jane), users(:john)]
-      query.send(:invoke_param, User.all, :order, 'firstname.desc').should == [users(:john), users(:jane)]
+      expect(query.send(:invoke_param, User.all, :order, 'firstname.asc')).to eq([users(:jane), users(:john)])
+      expect(query.send(:invoke_param, User.all, :order, 'firstname.desc')).to eq([users(:john), users(:jane)])
     end
 
   end
@@ -112,11 +112,11 @@ describe ScopedFrom::Query do
   describe '#options' do
 
     it 'is set at initialization' do
-      ScopedFrom::Query.new(User, {}, bar: 'foo').instance_variable_get(:@options).should == { bar: 'foo' }
+      expect(ScopedFrom::Query.new(User, {}, bar: 'foo').instance_variable_get(:@options)).to eq(bar: 'foo')
     end
 
     it 'keys are symbolized' do
-      ScopedFrom::Query.new(User, {}, 'bar' => 'foo').instance_variable_get(:@options).should == { bar: 'foo' }
+      expect(ScopedFrom::Query.new(User, {}, 'bar' => 'foo').instance_variable_get(:@options)).to eq(bar: 'foo')
     end
 
   end
@@ -124,16 +124,16 @@ describe ScopedFrom::Query do
   describe '#order_column' do
 
     it 'is column specified into "order" parameter' do
-      query(User, order: 'firstname').order_column.should == 'firstname'
-      query(User, order: 'lastname.desc').order_column.should == 'lastname'
+      expect(query(User, order: 'firstname').order_column).to eq('firstname')
+      expect(query(User, order: 'lastname.desc').order_column).to eq('lastname')
     end
 
     it 'is nil if column does not exist' do
-      query(User, order: 'foo').order_column.should be_nil
+      expect(query(User, order: 'foo').order_column).to be_nil
     end
 
     it 'is nil if "order" param is not specified' do
-      query(User, search: 'foo').order_column.should be_nil
+      expect(query(User, search: 'foo').order_column).to be_nil
     end
 
   end
@@ -141,29 +141,29 @@ describe ScopedFrom::Query do
   describe '#order_direction' do
 
     it 'is direction specified into "order" parameter' do
-      query(User, order: 'firstname.asc').order_direction.should == 'asc'
-      query(User, order: 'firstname.desc').order_direction.should == 'desc'
+      expect(query(User, order: 'firstname.asc').order_direction).to eq('asc')
+      expect(query(User, order: 'firstname.desc').order_direction).to eq('desc')
     end
 
     it 'is "asc" if direction is not specified' do
-      query(User, order: 'firstname').order_direction.should == 'asc'
+      expect(query(User, order: 'firstname').order_direction).to eq('asc')
     end
 
     it 'is "asc" if direction is invalid' do
-      query(User, order: 'firstname.foo').order_direction.should == 'asc'
+      expect(query(User, order: 'firstname.foo').order_direction).to eq('asc')
     end
 
     it 'is direction even specified in another case' do
-      query(User, order: 'firstname.ASc').order_direction.should == 'asc'
-      query(User, order: 'firstname.DeSC').order_direction.should == 'desc'
+      expect(query(User, order: 'firstname.ASc').order_direction).to eq('asc')
+      expect(query(User, order: 'firstname.DeSC').order_direction).to eq('desc')
     end
 
     it 'is nil if column does not exist' do
-      query(User, order: 'foo.desc').order_direction.should be_nil
+      expect(query(User, order: 'foo.desc').order_direction).to be_nil
     end
 
     it 'is nil if "order" param is not specified' do
-      query(User, search: 'foo').order_direction.should be_nil
+      expect(query(User, search: 'foo').order_direction).to be_nil
     end
 
   end
@@ -171,17 +171,17 @@ describe ScopedFrom::Query do
   describe '#params' do
 
     it 'returns params specified at initialization' do
-      query(User, search: 'foo', 'enabled' => true).params.should == { 'search' => 'foo', 'enabled' => true }
+      expect(query(User, search: 'foo', 'enabled' => true).params).to eq({ 'search' => 'foo', 'enabled' => true })
     end
 
     it 'returns an hash with indifferent access' do
-      query(User, 'search' => 'bar').params.should be_a(ActiveSupport::HashWithIndifferentAccess)
-      query(User, 'search' => 'bar').params[:search].should == 'bar'
-      query(User, search: 'bar').params['search'].should == 'bar'
+      expect(query(User, 'search' => 'bar').params).to be_a(ActiveSupport::HashWithIndifferentAccess)
+      expect(query(User, 'search' => 'bar').params[:search]).to eq('bar')
+      expect(query(User, search: 'bar').params['search']).to eq('bar')
     end
 
     it 'can be converted to query string' do
-      query(User, search: ['foo', 'bar'], 'enabled' => '1').params.to_query.should == 'enabled=true&search%5B%5D=foo&search%5B%5D=bar'
+      expect(query(User, search: ['foo', 'bar'], 'enabled' => '1').params.to_query).to eq('enabled=true&search%5B%5D=foo&search%5B%5D=bar')
     end
 
   end
@@ -189,177 +189,177 @@ describe ScopedFrom::Query do
   describe '#params=' do
 
     it 'does not fails if nil is given' do
-      query(User, nil).params.should == {}
+      expect(query(User, nil).params).to eq({})
     end
 
     it 'removes values that are not scopes' do
-      query(User, foo: 'bar', 'search' => 'foo', enabled: true).params.should == { 'search' => 'foo', 'enabled' => true }
+      expect(query(User, foo: 'bar', 'search' => 'foo', enabled: true).params).to eq({ 'search' => 'foo', 'enabled' => true })
     end
 
     it 'is case sensitive' do
-      query(User, 'Enabled' => true, "SEARCH" => 'bar').params.should be_empty
+      expect(query(User, 'Enabled' => true, "SEARCH" => 'bar').params).to be_empty
     end
 
     it 'parse query string' do
-      query(User, 'search=foo%26baz&latest=true').params.should == { 'search' => 'foo&baz', 'latest' => true }
+      expect(query(User, 'search=foo%26baz&latest=true').params).to eq({ 'search' => 'foo&baz', 'latest' => true })
     end
 
     it 'removes blank values from query string' do
-      query(User, 'search=baz&toto=&bar=%20').params.should == { 'search' => 'baz' }
+      expect(query(User, 'search=baz&toto=&bar=%20').params).to eq({ 'search' => 'baz' })
     end
 
     it 'unescapes UTF-8 chars' do
-      query(User, 'search=%C3%A9').params.should == { 'search' => 'é' }
+      expect(query(User, 'search=%C3%A9').params).to eq({ 'search' => 'é' })
     end
 
     it 'can have multiple values (from hash)' do
-      query(User, search: ['bar', 'baz']).params.should == { 'search' => ['bar', 'baz'] }
+      expect(query(User, search: ['bar', 'baz']).params).to eq({ 'search' => ['bar', 'baz'] })
     end
 
     it 'can have multiple values (from query string)' do
-      query(User, 'search=bar&search=baz').params.should == { 'search' => ['bar', 'baz'] }
+      expect(query(User, 'search=bar&search=baz').params).to eq({ 'search' => ['bar', 'baz'] })
     end
 
     it 'converts value to true (or remove it) if scope takes no argument' do
-      query(User, latest: 'y').params.should == { 'latest' => true }
-      query(User, latest: 'no').params.should == {}
+      expect(query(User, latest: 'y').params).to eq({ 'latest' => true })
+      expect(query(User, latest: 'no').params).to eq({})
     end
 
     it 'converts value to true (or false) if column is a boolean one' do
-      query(User, admin: 'y').params.should == { 'admin' => true }
-      query(User, admin: 'False').params.should == { 'admin' => false }
-      query(User, admin: 'bar').params.should == {}
-      query(User, admin: ['y', false]).params.should == {}
+      expect(query(User, admin: 'y').params).to eq({ 'admin' => true })
+      expect(query(User, admin: 'False').params).to eq({ 'admin' => false })
+      expect(query(User, admin: 'bar').params).to eq({})
+      expect(query(User, admin: ['y', false]).params).to eq({})
     end
 
     it 'converts array value to true (or remove it) if scope takes no argument' do
-      query(User, latest: true).params.should == { 'latest' => true }
-      query(User, latest: ['Yes']).params.should == { 'latest' => true }
-      query(User, latest: ['no', 'yes']).params.should == {}
-      query(User, latest: ['no', nil]).params.should == {}
-      query(User, latest: ['fo']).params.should == {}
+      expect(query(User, latest: true).params).to eq({ 'latest' => true })
+      expect(query(User, latest: ['Yes']).params).to eq({ 'latest' => true })
+      expect(query(User, latest: ['no', 'yes']).params).to eq({})
+      expect(query(User, latest: ['no', nil]).params).to eq({})
+      expect(query(User, latest: ['fo']).params).to eq({})
     end
 
     it 'flats array' do
-      query(User, search: [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params.should == { 'search' => [nil, 'bar', '', 'foo', "\n ", 'baz'] }
+      expect(query(User, search: [nil, ['bar', '', 'foo', ["\n ", 'baz']]]).params).to eq({ 'search' => [nil, 'bar', '', 'foo', "\n ", 'baz'] })
     end
 
     it 'change array with a single value in one value' do
-      query(User, search: ['bar']).params.should == { 'search' => 'bar' }
+      expect(query(User, search: ['bar']).params).to eq({ 'search' => 'bar' })
     end
 
     it 'does not modify given hash' do
       hash = { search: 'foo', enabled: '1', bar: 'foo' }
       query(User, hash)
-      hash.should == { search: 'foo', enabled: '1', bar: 'foo' }
+      expect(hash).to eq({ search: 'foo', enabled: '1', bar: 'foo' })
     end
 
     it 'does not modify given array' do
       items = ['bar', 'foo', nil]
       query(User, search: items)
-      items.should == ['bar', 'foo', nil]
+      expect(items).to eq(['bar', 'foo', nil])
     end
 
     it 'accepts :only option' do
-      query(User, { search: 'bar', enabled: 'true' }, only: [:search]).params.should == { 'search' => 'bar' }
-      query(User, { search: 'bar', enabled: 'true' }, only: 'search').params.should == { 'search' => 'bar' }
-      query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: 'search').params.should == { 'search' => 'bar' }
-      query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: ['search', :firstname]).params.should == { 'search' => 'bar', 'firstname' => 'Jane' }
+      expect(query(User, { search: 'bar', enabled: 'true' }, only: [:search]).params).to eq({ 'search' => 'bar' })
+      expect(query(User, { search: 'bar', enabled: 'true' }, only: 'search').params).to eq({ 'search' => 'bar' })
+      expect(query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: 'search').params).to eq({ 'search' => 'bar' })
+      expect(query(User, { search: 'bar', firstname: 'Jane', enabled: 'true' }, only: ['search', :firstname]).params).to eq({ 'search' => 'bar', 'firstname' => 'Jane' })
     end
 
     it 'accepts :except option' do
-      query(User, { search: 'bar', enabled: true }, except: [:search]).params.should == { 'enabled' => true }
-      query(User, { search: 'bar', enabled: true }, except: 'search').params.should == { 'enabled' => true }
-      query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: 'search').params.should == { 'enabled' => true, 'firstname' => 'Jane' }
-      query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: ['search', :firstname]).params.should == { 'enabled' => true }
+      expect(query(User, { search: 'bar', enabled: true }, except: [:search]).params).to eq({ 'enabled' => true })
+      expect(query(User, { search: 'bar', enabled: true }, except: 'search').params).to eq({ 'enabled' => true })
+      expect(query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: 'search').params).to eq({ 'enabled' => true, 'firstname' => 'Jane' })
+      expect(query(User, { search: 'bar', firstname: 'Jane', enabled: true }, except: ['search', :firstname]).params).to eq({ 'enabled' => true })
     end
 
     it 'accepts a query instance' do
-      query(User, query(User, search: 'toto')).params.should == { 'search' => 'toto' }
+      expect(query(User, query(User, search: 'toto')).params).to eq({ 'search' => 'toto' })
     end
 
     it 'preserve blank values' do
-      query(User, { search: "\n ", 'enabled' => true }).params.should == { 'search' => "\n ", 'enabled' => true }
+      expect(query(User, { search: "\n ", 'enabled' => true }).params).to eq({ 'search' => "\n ", 'enabled' => true })
     end
 
     it 'preserve blank values from array' do
-      query(User, { 'search' => ["\n ", 'toto', 'titi'] }).params.should == { 'search' => ["\n ", 'toto', 'titi'] }
-      query(User, { 'search' => [] }).params.should == {}
+      expect(query(User, { 'search' => ["\n ", 'toto', 'titi'] }).params).to eq({ 'search' => ["\n ", 'toto', 'titi'] })
+      expect(query(User, { 'search' => [] }).params).to eq({})
     end
 
     it 'also preserve blank on query string' do
-      query(User, 'search=%20&enabled=true&search=foo').params.should == { 'search' => [' ', 'foo'], 'enabled' => true }
+      expect(query(User, 'search=%20&enabled=true&search=foo').params).to eq({ 'search' => [' ', 'foo'], 'enabled' => true })
     end
 
     it 'includes column values' do
-      query(User, 'firstname' => 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
-      query(User, firstname: 'Jane', 'foo' => 'bar').params.should == { 'firstname' => 'Jane' }
+      expect(query(User, 'firstname' => 'Jane', 'foo' => 'bar').params).to eq({ 'firstname' => 'Jane' })
+      expect(query(User, firstname: 'Jane', 'foo' => 'bar').params).to eq({ 'firstname' => 'Jane' })
     end
 
     it 'exclude column values if :exclude_columns option is specified' do
-      query(User, { enabled: true, 'firstname' => 'Jane', 'foo' => 'bar' }, exclude_columns: true).params.should == { 'enabled' => true }
-      query(User, { enabled: true, firstname: 'Jane', foo: 'bar' }, exclude_columns: true).params.should == { 'enabled' => true }
+      expect(query(User, { enabled: true, 'firstname' => 'Jane', 'foo' => 'bar' }, exclude_columns: true).params).to eq({ 'enabled' => true })
+      expect(query(User, { enabled: true, firstname: 'Jane', foo: 'bar' }, exclude_columns: true).params).to eq({ 'enabled' => true })
     end
 
     it 'scopes have priority on columns' do
-      query(User, enabled: false).params.should == {}
+      expect(query(User, enabled: false).params).to eq({})
     end
 
     it 'maps an "order"' do
-      query(User, { 'order' => 'firstname.asc' }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => 'firstname.asc' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'does not map "order" if column is invalid' do
-      query(User, { 'order' => 'foo.asc' }).params.should == {}
+      expect(query(User, { 'order' => 'foo.asc' }).params).to eq({})
     end
 
     it 'use "asc" order direction by default' do
-      query(User, { 'order' => 'firstname' }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => 'firstname' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'use "asc" order direction if invalid' do
-      query(User, { 'order' => 'firstname.bar' }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => 'firstname.bar' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'use "desc" order direction if specified' do
-      query(User, { 'order' => 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
+      expect(query(User, { 'order' => 'firstname.desc' }).params).to eq({ 'order' => 'firstname.desc' })
     end
 
     it 'order direction is case insensitive' do
-      query(User, { 'order' => 'firstname.Asc' }).params.should == { 'order' => 'firstname.asc' }
-      query(User, { 'order' => 'firstname.DESC' }).params.should == { 'order' => 'firstname.desc' }
+      expect(query(User, { 'order' => 'firstname.Asc' }).params).to eq({ 'order' => 'firstname.asc' })
+      expect(query(User, { 'order' => 'firstname.DESC' }).params).to eq({ 'order' => 'firstname.desc' })
     end
 
     it 'order can be specified as symbol' do
-      query(User, { order: 'firstname.desc' }).params.should == { 'order' => 'firstname.desc' }
+      expect(query(User, { order: 'firstname.desc' }).params).to eq({ 'order' => 'firstname.desc' })
     end
 
     it "order is case sensitive" do
-      query(User, { 'Order' => 'firstname.desc' }).params.should == {}
+      expect(query(User, { 'Order' => 'firstname.desc' }).params).to eq({})
     end
 
     it 'many order can be specified' do
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
-      query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params.should == { 'order' => 'firstname.asc' }
-      query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
-      query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params.should == { 'order' => ['firstname.asc', 'lastname.desc'] }
+      expect(query(User, { 'order' => ['firstname.Asc', 'lastname.DESC'] }).params).to eq({ 'order' => ['firstname.asc', 'lastname.desc'] })
+      expect(query(User, { 'order' => ['firstname.Asc', 'firstname.desc'] }).params).to eq({ 'order' => 'firstname.asc' })
+      expect(query(User, { 'order' => ['firstname.Asc', 'lastname.DESC', 'firstname.desc'] }).params).to eq({ 'order' => ['firstname.asc', 'lastname.desc'] })
+      expect(query(User, { 'order' => ['firstname.Asc', 'foo', 'lastname.DESC', 'firstname.desc'] }).params).to eq({ 'order' => ['firstname.asc', 'lastname.desc'] })
     end
 
     it 'order can be delimited by a space' do
-      query(User, { 'order' => 'firstname ASC' }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => 'firstname ASC' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'order can be delimited by any white space' do
-      query(User, { 'order' => "firstname\nASC" }).params.should == { 'order' => 'firstname.asc' }
-      query(User, { 'order' => "firstname\t   ASC" }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => "firstname\nASC" }).params).to eq({ 'order' => 'firstname.asc' })
+      expect(query(User, { 'order' => "firstname\t   ASC" }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'order can be delimited by a ":"' do
-      query(User, { 'order' => "firstname:ASC" }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => "firstname:ASC" }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'order can be delimited by more than one delimiter' do
-      query(User, { 'order' => "firstname :.  ASC" }).params.should == { 'order' => 'firstname.asc' }
+      expect(query(User, { 'order' => "firstname :.  ASC" }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
   end
@@ -367,14 +367,14 @@ describe ScopedFrom::Query do
   describe '#relation' do
 
     it 'does not execute any query' do
-      User.should_not_receive(:connection)
+      expect(User).not_to receive(:connection)
       query(User, enabled: true).relation
     end
 
     it 'works with scopes with a lambda without arguments' do
       users(:jane).update_attribute(:created_at, 10.days.ago)
-      query(User, latest: true).relation.should == [users(:john)]
-      query(User, latest: false).relation.should == [users(:john), users(:jane)]
+      expect(query(User, latest: true).relation).to eq([users(:john)])
+      expect(query(User, latest: false).relation).to eq([users(:john), users(:jane)])
     end
 
     it 'does not modify relation specified at initialization' do
@@ -383,55 +383,51 @@ describe ScopedFrom::Query do
       expect {
         expect {
           q.relation
-        }.to_not change { q.instance_variable_get('@relation') }
-      }.to_not change { relation }
+        }.not_to change { q.instance_variable_get('@relation') }
+      }.not_to change { relation }
     end
 
     it 'returns relation specified at construction if params are empty' do
-      query.relation.should_not == User
-      query.relation.should == User.all
+      expect(query.relation).not_to eq(User)
+      expect(query.relation).to eq(User.all)
     end
 
     it 'invokes many times relation if an array is given' do
-      query(User, search: ['John', 'Doe']).relation.should == [users(:john)]
-      query(User, search: ['John', 'Done']).relation.should == []
-      query(User, search: ['John', 'Doe']).params.should == { 'search' => ['John', 'Doe'] }
+      expect(query(User, search: ['John', 'Doe']).relation).to eq([users(:john)])
+      expect(query(User, search: ['John', 'Done']).relation).to eq([])
+      expect(query(User, search: ['John', 'Doe']).params).to eq({ 'search' => ['John', 'Doe'] })
     end
 
     it 'invokes many times relation if given twice (as string & symbol)' do
-      query(User, search: 'John', 'search' => 'Done').params['search'].size.should be(2)
-      query(User, search: 'John', 'search' => 'Done').params['search'].should include('John', 'Done')
-
-
-      query(User, search: 'John', 'search' => ['Did', 'Done']).params['search'].size.should be(3)
-      query(User, search: 'John', 'search' => ['Did', 'Done']).params['search'].should include('John', 'Did', 'Done')
+      expect(query(User, search: 'John', 'search' => 'Done').params['search']).to contain_exactly('John', 'Done')
+      expect(query(User, search: 'John', 'search' => ['Did', 'Done']).params['search']).to contain_exactly('John', 'Did', 'Done')
     end
 
     it 'invokes last order if an array is given' do
       create_user(:jane2, firstname: 'Jane', lastname: 'Zoe')
 
-      query(User, order: ['lastname', 'firstname']).relation.should == [users(:jane), users(:john), users(:jane2)]
-      query(User, order: ['lastname', 'firstname.desc']).relation.should == [users(:john), users(:jane), users(:jane2)]
-      query(User, order: ['firstname', 'lastname.desc']).relation.should == [users(:jane2), users(:jane), users(:john)]
-      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:class).should == [Arel::Nodes::Descending, Arel::Nodes::Ascending]
-      query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:expr).map(&:name).should == ['firstname', 'lastname']
+      expect(query(User, order: ['lastname', 'firstname']).relation).to eq([users(:jane), users(:john), users(:jane2)])
+      expect(query(User, order: ['lastname', 'firstname.desc']).relation).to eq([users(:john), users(:jane), users(:jane2)])
+      expect(query(User, order: ['firstname', 'lastname.desc']).relation).to eq([users(:jane2), users(:jane), users(:john)])
+      expect(query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:class)).to eq([Arel::Nodes::Descending, Arel::Nodes::Ascending])
+      expect(query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:expr).map(&:name)).to eq(['firstname', 'lastname'])
     end
 
     it 'defines #query method on returned relation' do
-      query(User).relation.should respond_to(:query)
+      expect(query(User).relation).to respond_to(:query)
     end
 
     it 'does not define #query method for future relations' do
-      query(User).relation.query.should be_present
-      User.should_not respond_to(:query)
-      User.all.should_not respond_to(:query)
-      User.enabled.should_not respond_to(:query)
+      expect(query(User).relation.query).to be_present
+      expect(User).not_to respond_to(:query)
+      expect(User.all).not_to respond_to(:query)
+      expect(User.enabled).not_to respond_to(:query)
     end
 
     it 'defined #query method returns query' do
       q = query(User)
-      q.relation.query.should be_a(ScopedFrom::Query)
-      q.relation.query.should be(q)
+      expect(q.relation.query).to be_a(ScopedFrom::Query)
+      expect(q.relation.query).to be(q)
     end
 
   end
@@ -439,54 +435,54 @@ describe ScopedFrom::Query do
   describe '#true?' do
 
     it 'is true if true is given' do
-      query.send(:true?, true).should be_true
+      expect(query.send(:true?, true)).to be(true)
     end
 
     it 'is true if "true" is given' do
-      query.send(:true?, 'true').should be_true
-      query.send(:true?, 'True').should be_true
+      expect(query.send(:true?, 'true')).to be(true)
+      expect(query.send(:true?, 'True')).to be(true)
     end
 
     it 'is true if "1" is given' do
-      query.send(:true?, '1').should be_true
+      expect(query.send(:true?, '1')).to be(true)
     end
 
     it 'is true if "on" is given' do
-      query.send(:true?, 'on').should be_true
-      query.send(:true?, 'ON ').should be_true
+      expect(query.send(:true?, 'on')).to be(true)
+      expect(query.send(:true?, 'ON ')).to be(true)
     end
 
     it 'is true if "yes" is given' do
-      query.send(:true?, 'yes').should be_true
-      query.send(:true?, ' Yes ').should be_true
+      expect(query.send(:true?, 'yes')).to be(true)
+      expect(query.send(:true?, ' Yes ')).to be(true)
     end
 
     it 'is true if "y" is given' do
-      query.send(:true?, 'y').should be_true
-      query.send(:true?, 'Y ').should be_true
+      expect(query.send(:true?, 'y')).to be(true)
+      expect(query.send(:true?, 'Y ')).to be(true)
     end
 
     it 'is false if false is given' do
-      query.send(:true?, false).should be_false
+      expect(query.send(:true?, false)).to be(false)
     end
 
     it 'is false if "false" is given' do
-      query.send(:true?, 'false').should be_false
-      query.send(:true?, 'FsALSE').should be_false
+      expect(query.send(:true?, 'false')).to be(false)
+      expect(query.send(:true?, 'FsALSE')).to be(false)
     end
 
     it 'is false if "0" is given' do
-      query.send(:true?, '0').should be_false
+      expect(query.send(:true?, '0')).to be(false)
     end
 
     it 'is false if "off" is given' do
-      query.send(:true?, "off").should be_false
-      query.send(:true?, "Off").should be_false
+      expect(query.send(:true?, "off")).to be(false)
+      expect(query.send(:true?, "Off")).to be(false)
     end
 
     it 'is false otherwise' do
-      query.send(:true?, 42).should be_false
-      query.send(:true?, 'bam').should be_false
+      expect(query.send(:true?, 42)).to be(false)
+      expect(query.send(:true?, 'bam')).to be(false)
     end
 
   end
