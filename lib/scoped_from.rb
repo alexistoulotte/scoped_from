@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'cgi'
 require 'active_record'
+require 'active_support'
 require 'active_support/concern'
 require 'active_support/core_ext/object/to_query'
 

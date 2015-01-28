@@ -7,6 +7,6 @@ ActiveRecord::Base.connection.create_table(:users, force: true) do |t|
   t.string :lastname, null: false
   t.boolean :enabled, null: false, default: false
   t.boolean :admin, null: false, default: false
-  t.timestamps
+  t.timestamps null: false
 end
 ActiveRecord::Base.connection.create_table(:votes, force: true)
