@@ -7,7 +7,9 @@ Provides a simple mapping between scopes and controller parameters for
 
 Just add this into your `Gemfile`:
 
-    gem 'scoped_from'
+```ruby
+gem 'scoped_from'
+```
 
 Then, just run `bundle install`.
 
@@ -15,39 +17,45 @@ Then, just run `bundle install`.
 
 First, a model with some scopes:
 
-    class Post < ActiveRecord::Base
+```ruby
+class Post < ActiveRecord::Base
 
-      scope :commented, where('comments_count > 0')
+  scope :commented, where('comments_count > 0')
 
-      scope :created_between, lambda { |after, before|
-        where('created_at >= ? AND created_at <= ?', after, before)
-      }
+  scope :created_between, lambda { |after, before|
+    where('created_at >= ? AND created_at <= ?', after, before)
+  }
 
-      scope :search, lambda { |pattern|
-        where('body LIKE ?', "%#{pattern}%")
-      }
+  scope :search, lambda { |pattern|
+    where('body LIKE ?', "%#{pattern}%")
+  }
 
-      scope :with_category, lambda { |category_id|
-        where(:category_id, category_id)
-      }
+  scope :with_category, lambda { |category_id|
+    where(:category_id, category_id)
+  }
 
-    end
+end
+```
 
 After, a controller:
 
-    class PostsController < ActionController::Base
+```ruby
+class PostsController < ActionController::Base
 
-      def index
-        @posts = Post.scoped_from(params)
-      end
+  def index
+    @posts = Post.scoped_from(params)
+  end
 
-    end
+end
+```
 
 Then, it just filter your model from params:
 
-    /posts?commented=1
-    /posts?search=rails
-    /posts?search=rails&commented=1&with_category=42
+```
+/posts?commented=1
+/posts?search=rails
+/posts?search=rails&commented=1&with_category=42
+```
 
 ## Accepted scopes
 
@@ -64,21 +72,29 @@ Columns are also automatically scoped.
 
 You can restrict mapping to some scopes with `:only` option:
 
-    @posts = Post.scoped_from(params, only: ['commented', 'search'])
+```ruby
+@posts = Post.scoped_from(params, only: ['commented', 'search'])
+```
 
 You can also exclude some scopes from mapping with `:except` option:
 
-    @posts = Post.scoped_from(params, except: 'commented')
+```ruby
+@posts = Post.scoped_from(params, except: 'commented')
+```
 
 ## Mapping order
 
 If you need to map an SQL order, just pass `order` parameter:
 
-    @posts = Post.scoped_from(order: 'created_at')
+```ruby
+@posts = Post.scoped_from(order: 'created_at')
+```
 
 Order direction can be specified using a dot, space or `:` as delimiter:
 
-    @posts = Post.scoped_from(order: 'created_at.desc')
+```ruby
+@posts = Post.scoped_from(order: 'created_at.desc')
+```
 
 Note that order is SQL safe with `scoped_from` method (columns names are
 checked).
@@ -88,26 +104,36 @@ checked).
 If your provide an array as parameter value, scope is invoked with each item
 of the array:
 
-    @posts = Post.scoped_from(search: ['bar', 'foo'])
+```ruby
+@posts = Post.scoped_from(search: ['bar', 'foo'])
+```
 
 is equivalent to
 
-    @posts = Post.search('bar').search('foo')
+```ruby
+@posts = Post.search('bar').search('foo')
+```
 
 You may also not want to filter on columns, just specify `:exclude_columns`
 option:
 
-    @posts = Post.scoped_from(params, exclude_columns: true)
+```ruby
+@posts = Post.scoped_from(params, exclude_columns: true)
+```
 
 A query string can also be given to `scoped_from` method:
 
-    @posts = Post.scoped_from('with_category=24&search[]=foo&search[]=bar')
+```ruby
+@posts = Post.scoped_from('with_category=24&search[]=foo&search[]=bar')
+```
 
 Returned scope from `scoped_from` method gives access to an internal query
 object:
 
-    @posts = Post.scoped_from(params)
-    @query = @posts.query
+```ruby
+@posts = Post.scoped_from(params)
+@query = @posts.query
+```
 
 This query provides you some convenience methods like `params`, `order_column`
 and `order_direction`. This object can also be used to save user's search into
@@ -117,23 +143,27 @@ But, you may also have to subclass this query class. You have to create a
 subclass of `ScopedFrom::Query` named `#{RecordClassName}Query`. Here is an
 example:
 
-    class PostQuery < ScopedFrom::Query
+```ruby
+class PostQuery < ScopedFrom::Query
 
-      def category
-        Category.find_by_id(params[:with_category]) if params[:with_category]
-      end
+  def category
+    Category.find_by_id(params[:with_category]) if params[:with_category]
+  end
 
-    end
+end
+```
 
 This class has to be in load path.
 
 Then into a view:
 
-    <% if @query.category %>
-      <p>All posts of category <%= @query.category.name %></p>
-    <% else %>
-      <p>All posts</p>
-    <% end %>
+```erb
+<% if @query.category %>
+  <p>All posts of category <%= @query.category.name %></p>
+<% else %>
+  <p>All posts</p>
+<% end %>
+```
 
 ## Executing test suite
 
