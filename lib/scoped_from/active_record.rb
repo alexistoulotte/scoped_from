@@ -9,7 +9,7 @@ module ScopedFrom
       base.scope_arities = ActiveSupport::HashWithIndifferentAccess.new
     end
 
-    module ClassMethods
+    class_methods do
 
       def scope(name, scope_options, &block)
         super
