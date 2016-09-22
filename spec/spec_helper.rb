@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] ||= 'test'
 
 require File.expand_path("#{__dir__}/../lib/scoped_from")
+require 'action_controller'
 require 'byebug'
 
 # Support

@@ -74,7 +74,7 @@ module ScopedFrom
 
     def params=(params)
       params = params.params if params.is_a?(self.class)
-      params = CGI.parse(params.to_s) unless params.is_a?(Hash)
+      params = CGI.parse(params.to_s) unless params.is_a?(Hash) || defined?(ActionController::Parameters) && params.is_a?(ActionController::Parameters)
       @params = ActiveSupport::HashWithIndifferentAccess.new
       params.each do |name, value|
         values = [value].flatten

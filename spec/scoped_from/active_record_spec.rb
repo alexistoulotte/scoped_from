@@ -116,6 +116,10 @@ describe ScopedFrom::ActiveRecord do
       expect(VoteQuery).to be_a(Module)
     end
 
+    it 'is accepts ActionController::Parameters' do
+      expect(User.scoped_from(ActionController::Parameters.new(search: 'jane'))).to eq([users(:jane)])
+    end
+
   end
 
 end
