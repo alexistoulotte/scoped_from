@@ -1,7 +1,7 @@
 # ScopedFrom
 
 Provides a simple mapping between scopes and controller parameters for
-[Ruby On Rails 4](http://rubyonrails.org/).
+[Ruby On Rails 5](http://rubyonrails.org/).
 
 ## Installation
 
