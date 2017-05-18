@@ -9,10 +9,11 @@ Gem::Specification.new do |s|
   s.description = 'Provides a simple mapping between Active Record scopes and controller parameters for Ruby On Rails 4'
   s.license = 'MIT'
 
-  s.files = `git ls-files`.split("\n")
-  s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.files = `git ls-files | grep -vE '^(spec/|test/|\\.|Gemfile|Rakefile)'`.split("\n")
   s.executables = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
+
+  s.required_ruby_version = '>= 2.0.0'
 
   s.add_dependency 'activerecord', '>= 5.0.0', '< 5.1.0'
   s.add_dependency 'activesupport', '>= 5.0.0', '< 5.1.0'
