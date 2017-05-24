@@ -15,12 +15,12 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0.0'
 
-  s.add_dependency 'activerecord', '>= 5.0.0', '< 5.1.0'
-  s.add_dependency 'activesupport', '>= 5.0.0', '< 5.1.0'
+  s.add_dependency 'activerecord', '>= 5.0.0', '< 5.2.0'
+  s.add_dependency 'activesupport', '>= 5.0.0', '< 5.2.0'
 
-  s.add_development_dependency 'actionpack', '>= 5.0.0', '< 5.1.0'
+  s.add_development_dependency 'actionpack', '>= 5.0.0', '< 5.2.0'
   s.add_development_dependency 'byebug', '>= 3.2.0', '< 10.0.0'
-  s.add_development_dependency 'rake', '>= 10.3.0', '< 12.0.0'
-  s.add_development_dependency 'rspec', '>= 3.1.0', '< 3.6.0'
+  s.add_development_dependency 'rake', '>= 10.3.0', '< 13.0.0'
+  s.add_development_dependency 'rspec', '>= 3.1.0', '< 3.7.0'
   s.add_development_dependency 'sqlite3-ruby', '>= 1.3.0', '< 1.4.0'
 end
