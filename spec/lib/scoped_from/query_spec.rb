@@ -50,8 +50,8 @@ describe ScopedFrom::Query do
     end
 
     it 'is false if "on" is given' do
-      expect(query.send(:false?, "on")).to be(false)
-      expect(query.send(:false?, "On")).to be(false)
+      expect(query.send(:false?, 'on')).to be(false)
+      expect(query.send(:false?, 'On')).to be(false)
     end
 
     it 'is false otherwise' do
@@ -181,7 +181,7 @@ describe ScopedFrom::Query do
     end
 
     it 'can be converted to query string' do
-      expect(query(User, search: ['foo', 'bar'], 'enabled' => '1').params.to_query).to eq('enabled=true&search%5B%5D=foo&search%5B%5D=bar')
+      expect(query(User, search: %w(foo bar), 'enabled' => '1').params.to_query).to eq('enabled=true&search%5B%5D=foo&search%5B%5D=bar')
     end
 
   end
@@ -197,7 +197,7 @@ describe ScopedFrom::Query do
     end
 
     it 'is case sensitive' do
-      expect(query(User, 'Enabled' => true, "SEARCH" => 'bar').params).to be_empty
+      expect(query(User, 'Enabled' => true, 'SEARCH' => 'bar').params).to be_empty
     end
 
     it 'parse query string' do
@@ -213,11 +213,11 @@ describe ScopedFrom::Query do
     end
 
     it 'can have multiple values (from hash)' do
-      expect(query(User, search: ['bar', 'baz']).params).to eq({ 'search' => ['bar', 'baz'] })
+      expect(query(User, search: %w(bar baz)).params).to eq({ 'search' => %w(bar baz) })
     end
 
     it 'can have multiple values (from query string)' do
-      expect(query(User, 'search=bar&search=baz').params).to eq({ 'search' => ['bar', 'baz'] })
+      expect(query(User, 'search=bar&search=baz').params).to eq({ 'search' => %w(bar baz) })
     end
 
     it 'converts value to true (or remove it) if scope takes no argument' do
@@ -235,7 +235,7 @@ describe ScopedFrom::Query do
     it 'converts array value to true (or remove it) if scope takes no argument' do
       expect(query(User, latest: true).params).to eq({ 'latest' => true })
       expect(query(User, latest: ['Yes']).params).to eq({ 'latest' => true })
-      expect(query(User, latest: ['no', 'yes']).params).to eq({})
+      expect(query(User, latest: %w(no yes)).params).to eq({})
       expect(query(User, latest: ['no', nil]).params).to eq({})
       expect(query(User, latest: ['fo']).params).to eq({})
     end
@@ -334,7 +334,7 @@ describe ScopedFrom::Query do
       expect(query(User, { order: 'firstname.desc' }).params).to eq({ 'order' => 'firstname.desc' })
     end
 
-    it "order is case sensitive" do
+    it 'order is case sensitive' do
       expect(query(User, { 'Order' => 'firstname.desc' }).params).to eq({})
     end
 
@@ -355,11 +355,11 @@ describe ScopedFrom::Query do
     end
 
     it 'order can be delimited by a ":"' do
-      expect(query(User, { 'order' => "firstname:ASC" }).params).to eq({ 'order' => 'firstname.asc' })
+      expect(query(User, { 'order' => 'firstname:ASC' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
     it 'order can be delimited by more than one delimiter' do
-      expect(query(User, { 'order' => "firstname :.  ASC" }).params).to eq({ 'order' => 'firstname.asc' })
+      expect(query(User, { 'order' => 'firstname :.  ASC' }).params).to eq({ 'order' => 'firstname.asc' })
     end
 
   end
@@ -393,24 +393,24 @@ describe ScopedFrom::Query do
     end
 
     it 'invokes many times relation if an array is given' do
-      expect(query(User, search: ['John', 'Doe']).relation).to eq([users(:john)])
-      expect(query(User, search: ['John', 'Done']).relation).to eq([])
-      expect(query(User, search: ['John', 'Doe']).params).to eq({ 'search' => ['John', 'Doe'] })
+      expect(query(User, search: %w(John Doe)).relation).to eq([users(:john)])
+      expect(query(User, search: %w(John Done)).relation).to eq([])
+      expect(query(User, search: %w(John Doe)).params).to eq({ 'search' => %w(John Doe) })
     end
 
     it 'invokes many times relation if given twice (as string & symbol)' do
       expect(query(User, search: 'John', 'search' => 'Done').params['search']).to contain_exactly('John', 'Done')
-      expect(query(User, search: 'John', 'search' => ['Did', 'Done']).params['search']).to contain_exactly('John', 'Did', 'Done')
+      expect(query(User, search: 'John', 'search' => %w(Did Done)).params['search']).to contain_exactly('John', 'Did', 'Done')
     end
 
     it 'invokes last order if an array is given' do
       create_user(:jane2, firstname: 'Jane', lastname: 'Zoe')
 
-      expect(query(User, order: ['lastname', 'firstname']).relation).to eq([users(:jane), users(:john), users(:jane2)])
+      expect(query(User, order: %w(lastname firstname)).relation).to eq([users(:jane), users(:john), users(:jane2)])
       expect(query(User, order: ['lastname', 'firstname.desc']).relation).to eq([users(:john), users(:jane), users(:jane2)])
       expect(query(User, order: ['firstname', 'lastname.desc']).relation).to eq([users(:jane2), users(:jane), users(:john)])
       expect(query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:class)).to eq([Arel::Nodes::Descending, Arel::Nodes::Ascending])
-      expect(query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:expr).map(&:name)).to eq(['firstname', 'lastname'])
+      expect(query(User, order: ['firstname.desc', 'lastname']).relation.order_values.map(&:expr).map(&:name)).to eq(%w(firstname lastname))
     end
 
     it 'defines #query method on returned relation' do
@@ -476,8 +476,8 @@ describe ScopedFrom::Query do
     end
 
     it 'is false if "off" is given' do
-      expect(query.send(:true?, "off")).to be(false)
-      expect(query.send(:true?, "Off")).to be(false)
+      expect(query.send(:true?, 'off')).to be(false)
+      expect(query.send(:true?, 'Off')).to be(false)
     end
 
     it 'is false otherwise' do

@@ -1,13 +1,12 @@
 module UserMacro
 
-  USERS = {}
-
   def create_user(label, attributes)
-    USERS[label] = User.create!(attributes)
+    @users ||= {}
+    @users[label] = User.create!(attributes)
   end
 
   def users(label)
-    USERS[label]
+    (@users || {})[label]
   end
 
 end

@@ -65,8 +65,8 @@ describe ScopedFrom::ActiveRecord do
     it 'just build a new query and return its scope' do
       query = double(:query)
       expect(query).to receive(:relation).and_return(42)
-      expect(ScopedFrom::Query).to receive(:new).with(User, 'foo', except: 'bam').and_return(query)
-      expect(User.scoped_from('foo', except: 'bam')).to eq(42)
+      expect(ScopedFrom::Query).to receive(:new).with(User, 'foo', {}).and_return(query)
+      expect(User.scoped_from('foo')).to eq(42)
     end
 
     it 'build scopes' do

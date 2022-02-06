@@ -1,4 +1,4 @@
-ENV["RAILS_ENV"] ||= 'test'
+ENV['RAILS_ENV'] ||= 'test'
 
 require File.expand_path("#{__dir__}/../lib/scoped_from")
 require 'action_controller'
@@ -8,7 +8,7 @@ require 'byebug'
 Dir["#{__dir__}/support/**/*.rb"].each { |f| require File.expand_path(f) }
 
 # Mocks
-ActiveSupport::Dependencies.autoload_paths << "#{__dir__}/mocks"
+Dir["#{__dir__}/mocks/**/*.rb"].each { |f| require File.expand_path(f) }
 
 RSpec.configure do |config|
   config.raise_errors_for_deprecations!

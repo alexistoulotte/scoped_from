@@ -27,8 +27,8 @@ module ScopedFrom
     def relation
       relation = @relation
       params.each do |name, value|
-        [value].flatten.each do |value|
-          relation = invoke_param(relation, name, value)
+        [value].flatten.each do |val|
+          relation = invoke_param(relation, name, val)
         end
       end
       decorate_relation(relation)
@@ -83,14 +83,14 @@ module ScopedFrom
           orders = parse_orders(values).map { |order| "#{order[:column]}.#{order[:direction]}" }
           @params[name] = (orders.many? ? orders : orders.first) if orders.any?
         elsif @relation.scope_without_argument?(name)
-          @params[name] = true if values.all? { |value| true?(value) }
+          @params[name] = true if values.all? { |val| true?(val) }
         elsif @relation.scope_with_one_argument?(name)
           value = values.many? ? values : values.first
           @params[name] = @params[name] ? [@params[name], value].flatten : value
         elsif @options[:exclude_columns].blank? && @relation.column_names.include?(name.to_s)
           if @relation.columns_hash[name.to_s].type == :boolean
-            @params[name] = true if values.all? { |value| true?(value) }
-            @params[name] = false if values.all? { |value| false?(value) }
+            @params[name] = true if values.all? { |val| true?(val) }
+            @params[name] = false if values.all? { |val| false?(val) }
           else
             value = values.many? ? values : values.first
             @params[name] = @params[name] ? [@params[name], value].flatten : value
@@ -102,17 +102,17 @@ module ScopedFrom
     end
 
     def parse_order(value)
-      column, direction = value.to_s.split(/[\.:\s]+/, 2)
+      column, direction = value.to_s.split(/[.:\s]+/, 2)
       direction = direction.to_s.downcase
       direction = ORDER_DIRECTIONS.first unless ORDER_DIRECTIONS.include?(direction)
-      @relation.column_names.include?(column) ? { column: column, direction: direction } : {}
+      @relation.column_names.include?(column) ? { column:, direction: } : {}
     end
 
     def parse_orders(values)
       [].tap do |orders|
         values.each do |value|
           order = parse_order(value)
-          orders << order if order.present? && !orders.any? { |o| o[:column] == order[:column] }
+          orders << order if order.present? && orders.none? { |o| o[:column] == order[:column] }
         end
       end
     end
